@@ -160,16 +160,23 @@ class cucmAxlConfig:
     def __setCucmCert(self, certFileName):
         self.__cucmCertFileName = certFileName
 
+    def getCucmCfgFileName(self):
+        return self.__cucmCfgFileName
+
     def __loadCucmCfgFile(self, filename):
         logging.debug("Reading from file")
-        with open(filename) as cucmCfgFile:
-            cucmCfg = json.load(cucmCfgFile)
-        self.__setCucmUsername(cucmCfg['username'])
-        self.__setCucmPassword(cucmCfg['password'])
-        self.__setCucmUrl(cucmCfg['url'])
-        self.__setCucmVerify(cucmCfg['verify'])
-        self.__setCucmCert(cucmCfg['verifyFile'])
-        logging.debug("File Read successfully")
+        try:
+            with open(filename) as cucmCfgFile:
+                cucmCfg = json.load(cucmCfgFile)
+                self.__setCucmUsername(cucmCfg['username'])
+                self.__setCucmPassword(cucmCfg['password'])
+                self.__setCucmUrl(cucmCfg['url'])
+                self.__setCucmVerify(cucmCfg['verify'])
+                self.__setCucmCert(cucmCfg['verifyFile'])
+                logging.debug("File Read successfully")
+        except Exception as e:
+            logging.debug("Unable to open Config file")
+            os.remove(self.getCucmCfgFileName())
 
     def __buildCucmCfgFile(self):
         logging.debug("Building new config file")
