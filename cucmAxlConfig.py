@@ -14,8 +14,8 @@ import OpenSSL  # download ssl cert
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 # create a file handler
-handler = logging.FileHandler('configInfo.log', mode='w')
-handler.setLevel(logging.INFO)
+handler = logging.FileHandler('configDebug.log', mode='w')
+handler.setLevel(logging.DEBUG)
 # create a logging format
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - \
                                 %(message)s')
@@ -48,8 +48,8 @@ class cucmAxlConfig:
                          " the UCM 11.5 WSDL file.")
             logger.error("If you choose to use a different version of" +
                          "the WSDL your results may vary.")
-            logger.error("The 11.5 version CUCM WSDL file must be placed in {0}"
-                         .format(self.__localDir+self.__wsdlFileName))
+            logger.error("The 11.5 version WSDL file must be placed in %s",
+                         os.path.join(self.__localDir+self.__wsdlFileName))
             raise Exception('WSDL File NOT found. Unrecoverable error.')
         else:
             self.__wsdlFileName = self.__localDir + self.__wsdlFileName
@@ -66,7 +66,17 @@ class cucmAxlConfig:
         from zeep import Client
         from zeep.cache import SqliteCache
         from zeep.transports import Transport
-        logging.getLogger('zeep.transports').setLevel(logging.DEBUG)
+        zeeplogger = logging.getLogger('zeep.transports')
+        zeeplogger.setLevel(logging.DEBUG)
+        zeephandler = logging.FileHandler('zeepDebug.log', mode='w')
+        zeephandler.setLevel(logging.DEBUG)
+        # create a logging format
+        zeepformatter = logging.Formatter('%(asctime)s - %(name)s - \
+                            %(levelname)s - %(message)s')
+        zeephandler.setFormatter(zeepformatter)
+        # add the handlers to the logger
+        zeeplogger.addHandler(zeephandler)
+        zeeplogger.info('Begin zeep Logging')
 
         cache = SqliteCache(path='/tmp/wsdlsqlite.db', timeout=60)
         transport = Transport(cache=cache)
@@ -104,14 +114,13 @@ class cucmAxlConfig:
             fileLocation = directory + filename
         else:
             fileLocation = filename
-        logger.debug("Checking for {0} file in {1}"
-                     .format(filename, directory))
+        logger.debug("Checking for %s file in %s", filename, directory)
         fileExists = os.path.isfile(fileLocation)
-        logger.debug("Exists={0}".format(fileExists))
+        logger.debug("Exists=%s", fileExists)
         if not fileExists:
-            logger.debug("{0} NOT Found".format(fileLocation))
+            logger.debug("%s NOT Found", fileLocation)
             return fileExists
-        logger.debug("{0} file found".format(filename))
+        logger.debug("%s file found", filename)
         return fileExists
 
     def getwsdlFileName(self):
@@ -155,16 +164,17 @@ class cucmAxlConfig:
     def __downloadCucmCert(self):
         hostname = self.getCucmUrl()
         port = 443
-        logger.debug("using {0}:{1} to download cert".format(hostname, port))
+        logger.debug("using %s:%s to download cert", hostname, port)
         cert = ssl.get_server_certificate((hostname, port))
         x509 = OpenSSL.crypto.load_certificate(
                                             OpenSSL.crypto.FILETYPE_PEM, cert)
         certExport = OpenSSL.crypto.dump_certificate(
                                             OpenSSL.crypto.FILETYPE_PEM, x509)
-        certFileName = self.__localDir+'/{0}.pem'.format(hostname)
+        certFileName = os.path.join(self.__localDir,
+                                    '{0}.pem'.format(hostname))
         with open(certFileName, 'wb') as certFile:
             certFile.write(certExport)
-            logger.debug("Cert file saved to {0}".format(certFileName))
+            logger.debug("Cert file saved to %s", certFileName)
         self.__setCucmCert(certFileName)
 
     def __setCucmCert(self, certFileName):
