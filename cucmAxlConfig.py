@@ -34,12 +34,12 @@ class cucmAxlConfig:
         wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
                                              self.__localDir)
         if not wsdlFileFound:
-            print("This version of cucmAxlWriter is expecting" +
-                  " the UCM 11.5 WSDL file.")
-            print("If you choose to use a different version of" +
-                  "the WSDL your results may vary.")
-            print("The 11.5 version CUCM WSDL file must be placed in {0}"
-                  .format(self.__localDir+self.__wsdlFileName))
+            logging.error("This version of cucmAxlWriter is expecting" +
+                          " the UCM 11.5 WSDL file.")
+            logging.error("If you choose to use a different version of" +
+                          "the WSDL your results may vary.")
+            logging.error("The 11.5 version CUCM WSDL file must be placed in {0}"
+                          .format(self.__localDir+self.__wsdlFileName))
             raise Exception('WSDL File NOT found. Unrecoverable error.')
         else:
             self.__wsdlFileName = self.__localDir + self.__wsdlFileName
