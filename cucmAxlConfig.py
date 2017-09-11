@@ -1,4 +1,4 @@
-#! /usr/local/bin/python3
+#!/usr/bin/env python3.6
 # cucmAxlConfig.py
 # Christopher Phillips - 2017-08-30
 
