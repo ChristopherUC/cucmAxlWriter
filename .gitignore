@@ -3,3 +3,4 @@
 /ucm.cfg
 /*.pem
 /__pycache__/*
+/*.log
