@@ -40,7 +40,7 @@ class cucmAxlConfig:
                   "the WSDL your results may vary.")
             print("The 11.5 version CUCM WSDL file must be placed in {0}"
                   .format(self.__localDir+self.__wsdlFileName))
-            exit(-1)
+            raise Exception('WSDL File NOT found. Unrecoverable error.')
         else:
             self.__wsdlFileName = self.__localDir + self.__wsdlFileName
 
