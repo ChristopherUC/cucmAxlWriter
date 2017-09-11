@@ -8,7 +8,7 @@ import json  # config file read/write
 
 import socket  # download ssl cert, check IP vs hostname
 import ssl  # download ssl cert
-import OpenSSL  # pip install pyopenssl, # download ssl cert
+import OpenSSL  # download ssl cert
 
 logging.basicConfig(level=logging.DEBUG,
                     format=' %(asctime)s - %(levelname)s- %(message)s')
