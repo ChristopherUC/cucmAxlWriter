@@ -10,9 +10,18 @@ import socket  # download ssl cert, check IP vs hostname
 import ssl  # download ssl cert
 import OpenSSL  # download ssl cert
 
-logging.basicConfig(level=logging.DEBUG,
-                    format=' %(asctime)s - %(levelname)s- %(message)s')
-# logging.disable(logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# create a file handler
+handler = logging.FileHandler('configInfo.log')
+handler.setLevel(logging.INFO)
+# create a logging format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - \
+                                %(message)s')
+handler.setFormatter(formatter)
+# add the handlers to the logger
+logger.addHandler(handler)
+logger.info('Begin cucmAxlConfig Logging')
 
 
 class cucmAxlConfig:
@@ -34,12 +43,12 @@ class cucmAxlConfig:
         wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
                                              self.__localDir)
         if not wsdlFileFound:
-            logging.error("This version of cucmAxlWriter is expecting" +
-                          " the UCM 11.5 WSDL file.")
-            logging.error("If you choose to use a different version of" +
-                          "the WSDL your results may vary.")
-            logging.error("The 11.5 version CUCM WSDL file must be placed in {0}"
-                          .format(self.__localDir+self.__wsdlFileName))
+            logger.error("This version of cucmAxlWriter is expecting" +
+                         " the UCM 11.5 WSDL file.")
+            logger.error("If you choose to use a different version of" +
+                         "the WSDL your results may vary.")
+            logger.error("The 11.5 version CUCM WSDL file must be placed in {0}"
+                         .format(self.__localDir+self.__wsdlFileName))
             raise Exception('WSDL File NOT found. Unrecoverable error.')
         else:
             self.__wsdlFileName = self.__localDir + self.__wsdlFileName
@@ -67,41 +76,41 @@ class cucmAxlConfig:
 
         session = Session()
         if self.getCucmVerify():
-            logging.info("Session Security ENABLED")
+            logger.info("Session Security ENABLED")
             session.verify = self.getCucmCert()
         else:
-            logging.info("Session Security DISABLED")
+            logger.info("Session Security DISABLED")
             session.verify = self.getCucmVerify()
-        logging.info("Session Created")
+        logger.info("Session Created")
         session.auth = HTTPBasicAuth(self.getCucmUsername(),
                                      self.getCucmPassword())
-        logging.info("Auth Created")
+        logger.info("Auth Created")
 
         client = Client(wsdl=self.getwsdlFileName(),
                         transport=Transport(session=session))
-        logging.info("Client Created")
+        logger.info("Client Created")
 
         self.factory = client.type_factory('ns0')
-        logging.info("Factory Created")
+        logger.info("Factory Created")
 
         self.service = client.create_service(
             "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding",
             self.getCucmAxlUrl())
-        logging.info("Service Created")
+        logger.info("Service Created")
 
     def checkFileExists(self, filename, directory):
         if directory not in filename:
             fileLocation = directory + filename
         else:
             fileLocation = filename
-        logging.debug("Checking for {0} file in {1}"
-                      .format(filename, directory))
+        logger.debug("Checking for {0} file in {1}"
+                     .format(filename, directory))
         fileExists = os.path.isfile(fileLocation)
-        logging.debug("Exists={0}".format(fileExists))
+        logger.debug("Exists={0}".format(fileExists))
         if not fileExists:
-            logging.debug("{0} NOT Found".format(fileLocation))
+            logger.debug("{0} NOT Found".format(fileLocation))
             return fileExists
-        logging.debug("{0} file found".format(filename))
+        logger.debug("{0} file found".format(filename))
         return fileExists
 
     def getwsdlFileName(self):
@@ -145,7 +154,7 @@ class cucmAxlConfig:
     def __downloadCucmCert(self):
         hostname = self.getCucmUrl()
         port = 443
-        logging.debug("using {0}:{1} to download cert".format(hostname, port))
+        logger.debug("using {0}:{1} to download cert".format(hostname, port))
         cert = ssl.get_server_certificate((hostname, port))
         x509 = OpenSSL.crypto.load_certificate(
                                             OpenSSL.crypto.FILETYPE_PEM, cert)
@@ -154,7 +163,7 @@ class cucmAxlConfig:
         certFileName = self.__localDir+'/{0}.pem'.format(hostname)
         with open(certFileName, 'wb') as certFile:
             certFile.write(certExport)
-            logging.debug("Cert file saved to {0}".format(certFileName))
+            logger.debug("Cert file saved to {0}".format(certFileName))
         self.__setCucmCert(certFileName)
 
     def __setCucmCert(self, certFileName):
@@ -164,7 +173,7 @@ class cucmAxlConfig:
         return self.__cucmCfgFileName
 
     def __loadCucmCfgFile(self, filename):
-        logging.debug("Reading from file")
+        logger.debug("Reading from file")
         try:
             with open(filename) as cucmCfgFile:
                 cucmCfg = json.load(cucmCfgFile)
@@ -173,13 +182,13 @@ class cucmAxlConfig:
                 self.__setCucmUrl(cucmCfg['url'])
                 self.__setCucmVerify(cucmCfg['verify'])
                 self.__setCucmCert(cucmCfg['verifyFile'])
-                logging.debug("File Read successfully")
+                logger.debug("File Read successfully")
         except Exception as e:
-            logging.debug("Unable to open Config file")
+            logger.debug("Unable to open Config file")
             os.remove(self.getCucmCfgFileName())
 
     def __buildCucmCfgFile(self):
-        logging.debug("Building new config file")
+        logger.debug("Building new config file")
 
         # TODO: Try block for sanitization
         username = input("UCM AXL Username: ")
@@ -196,13 +205,13 @@ class cucmAxlConfig:
         # check if valid IP address by borrowing from socket
         try:
             socket.inet_aton(url)
-            logging.debug("Bypassing certificate download")
+            logger.debug("Bypassing certificate download")
             verify = False
         except socket.error:
             # TODO: Try block for sanitization
             verify = input("Use Certificates (y/n): ")
             if verify == 'y':
-                logging.debug("Downloading certificate")
+                logger.debug("Downloading certificate")
                 self.__downloadCucmCert()
                 certFileExists = self.checkFileExists(self.getCucmCert(),
                                                       self.__localDir)
@@ -211,7 +220,7 @@ class cucmAxlConfig:
                 else:
                     verify = False
             else:
-                logging.debug("Bypassing certificate download")
+                logger.debug("Bypassing certificate download")
                 verify = False
 
         data = {'username': username, 'password': password, 'url': url,
