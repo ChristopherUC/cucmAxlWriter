@@ -1,6 +1,7 @@
 #!/usr/bin/env python3.6
 # cucmAxlConfig.py
-# Christopher Phillips - 2017-08-30
+__version__ = '0.4'
+__author__ = 'Christopher Phillips'
 
 import os  # directories
 import logging  # debug
@@ -13,7 +14,7 @@ import OpenSSL  # download ssl cert
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 # create a file handler
-handler = logging.FileHandler('configInfo.log')
+handler = logging.FileHandler('configInfo.log', mode='w')
 handler.setLevel(logging.INFO)
 # create a logging format
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - \
