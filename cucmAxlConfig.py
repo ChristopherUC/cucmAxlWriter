@@ -1,12 +1,10 @@
 #!/usr/bin/env python3.6
-# cucmAxlConfig.py
 __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
 import os  # directories
 import logging  # debug
 import json  # config file read/write
-
 import socket  # download ssl cert, check IP vs hostname
 import ssl  # download ssl cert
 import OpenSSL  # download ssl cert
@@ -38,14 +36,8 @@ class cucmAxlConfig:
     __cucmPassword = ''
     __cucmVerify = ''
     __localDir = os.getcwd()
-    factory = ''
-    service = ''
 
     def __init__(self):
-
-        logger.debug("localdir=%s and filename=%s", self.__localDir,
-                     self.__wsdlFileName)
-
         wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
                                              self.__localDir)
         if not wsdlFileFound:
@@ -69,52 +61,6 @@ class cucmAxlConfig:
         self.__cucmCfgFileName = os.path.join(self.__localDir,
                                               self.__cucmCfgFileName)
         self.__loadCucmCfgFile(self.__cucmCfgFileName)
-
-        from zeep import Client
-        from zeep.cache import SqliteCache
-        from zeep.transports import Transport
-        zeeplogger = logging.getLogger('zeep.transports')
-        zeeplogger.setLevel(logging.DEBUG)
-        zeephandler = logging.FileHandler('zeepDebug.log', mode='w')
-        zeephandler.setLevel(logging.DEBUG)
-        # create a logging format
-        zeepformatter = logging.Formatter('%(asctime)s - %(name)s - \
-                            %(levelname)s - %(message)s')
-        zeephandler.setFormatter(zeepformatter)
-        # add the handlers to the logger
-        zeeplogger.addHandler(zeephandler)
-        zeeplogger.info('Begin zeep Logging')
-
-        cache = SqliteCache(path='/tmp/wsdlsqlite.db', timeout=60)
-        transport = Transport(cache=cache)
-        client = Client(self.getwsdlFileName(), transport=transport)
-
-        from requests import Session
-        from requests.auth import HTTPBasicAuth
-
-        session = Session()
-        if self.getCucmVerify():
-            logger.info("Session Security ENABLED")
-            session.verify = self.getCucmCert()
-        else:
-            logger.info("Session Security DISABLED")
-            session.verify = self.getCucmVerify()
-        logger.info("Session Created")
-        session.auth = HTTPBasicAuth(self.getCucmUsername(),
-                                     self.getCucmPassword())
-        logger.info("Auth Created")
-
-        client = Client(wsdl=self.getwsdlFileName(),
-                        transport=Transport(session=session))
-        logger.info("Client Created")
-
-        self.factory = client.type_factory('ns0')
-        logger.info("Factory Created")
-
-        self.service = client.create_service(
-            "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding",
-            self.getCucmAxlUrl())
-        logger.info("Service Created")
 
     def checkFileExists(self, filename, directory):
         if not filename.startswith(directory):
