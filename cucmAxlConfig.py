@@ -27,19 +27,21 @@ logger.info('Begin cucmAxlConfig Logging')
 
 class cucmAxlConfig:
     # holds config data for CUCM
+
+    # default /axlsqltoolkit/schema/current/AXLAPI.wsdl
+    __wsdlFileName = '/axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
+    # default /ucm.cfg
+    __cucmCfgFileName = '/ucm.cfg'
+    __cucmCertFileName = ''
+    __cucmUrl = ''
+    __cucmUsername = ''
+    __cucmPassword = ''
+    __cucmVerify = ''
+    __localDir = os.getcwd()
+    factory = ''
+    service = ''
+
     def __init__(self):
-        # default /axlsqltoolkit/schema/current/AXLAPI.wsdl
-        self.__wsdlFileName = '/axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
-        # default /ucm.cfg
-        self.__cucmCfgFileName = '/ucm.cfg'
-        self.__cucmCertFileName = ''
-        self.__cucmUrl = ''
-        self.__cucmUsername = ''
-        self.__cucmPassword = ''
-        self.__cucmVerify = ''
-        self.__localDir = os.getcwd()
-        self.factory = ''
-        self.service = ''
 
         wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
                                              self.__localDir)
