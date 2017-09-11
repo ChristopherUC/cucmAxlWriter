@@ -29,9 +29,9 @@ class cucmAxlConfig:
     # holds config data for CUCM
 
     # default /axlsqltoolkit/schema/current/AXLAPI.wsdl
-    __wsdlFileName = '/axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
+    __wsdlFileName = 'axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
     # default /ucm.cfg
-    __cucmCfgFileName = '/ucm.cfg'
+    __cucmCfgFileName = 'ucm.cfg'
     __cucmCertFileName = ''
     __cucmUrl = ''
     __cucmUsername = ''
@@ -43,6 +43,9 @@ class cucmAxlConfig:
 
     def __init__(self):
 
+        logger.debug("localdir=%s and filename=%s", self.__localDir,
+                     self.__wsdlFileName)
+
         wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
                                              self.__localDir)
         if not wsdlFileFound:
@@ -51,10 +54,11 @@ class cucmAxlConfig:
             logger.error("If you choose to use a different version of" +
                          "the WSDL your results may vary.")
             logger.error("The 11.5 version WSDL file must be placed in %s",
-                         os.path.join(self.__localDir+self.__wsdlFileName))
+                         os.path.join(self.__localDir, self.__wsdlFileName))
             raise Exception('WSDL File NOT found. Unrecoverable error.')
         else:
-            self.__wsdlFileName = self.__localDir + self.__wsdlFileName
+            self.__wsdlFileName = os.path.join(self.__localDir,
+                                               self.__wsdlFileName)
 
         cucmCfgFileFound = self.checkFileExists(self.__cucmCfgFileName,
                                                 self.__localDir)
@@ -62,7 +66,8 @@ class cucmAxlConfig:
             print("The CUCM Cfg file was not found.")
             print("Generating a new config file.")
             self.__buildCucmCfgFile()
-        self.__cucmCfgFileName = self.__localDir + self.__cucmCfgFileName
+        self.__cucmCfgFileName = os.path.join(self.__localDir,
+                                              self.__cucmCfgFileName)
         self.__loadCucmCfgFile(self.__cucmCfgFileName)
 
         from zeep import Client
@@ -112,13 +117,13 @@ class cucmAxlConfig:
         logger.info("Service Created")
 
     def checkFileExists(self, filename, directory):
-        if directory not in filename:
-            fileLocation = directory + filename
+        if not filename.startswith(directory):
+            fileLocation = os.path.join(directory, filename)
         else:
             fileLocation = filename
         logger.debug("Checking for %s file in %s", filename, directory)
         fileExists = os.path.isfile(fileLocation)
-        logger.debug("Exists=%s", fileExists)
+        logger.debug("%s Exists=%s", filename, fileExists)
         if not fileExists:
             logger.debug("%s NOT Found", fileLocation)
             return fileExists
