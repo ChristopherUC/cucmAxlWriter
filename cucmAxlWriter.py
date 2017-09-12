@@ -9,6 +9,8 @@ from zeep.cache import SqliteCache
 from zeep.transports import Transport
 from requests import Session
 from requests.auth import HTTPBasicAuth
+import urllib3  # imported to disable the SAN warning for the cert
+urllib3.disable_warnings(urllib3.exceptions.SubjectAltNameWarning)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
