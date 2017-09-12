@@ -17,7 +17,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - \
                                 %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.info('Begin cucmAxlConfig Logging')
+logger.info("Begin cucmAxlConfig Logging")
 
 
 class cucmAxlConfig:
@@ -43,7 +43,7 @@ class cucmAxlConfig:
                          "the WSDL your results may vary.")
             logger.error("The 11.5 version WSDL file must be placed in %s",
                          os.path.join(self.__localDir, self.__wsdlFileName))
-            raise Exception('WSDL File NOT found. Unrecoverable error.')
+            raise Exception("WSDL File NOT found. Unrecoverable error.")
         else:
             self.__wsdlFileName = os.path.join(self.__localDir,
                                                self.__wsdlFileName)

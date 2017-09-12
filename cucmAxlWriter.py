@@ -27,6 +27,11 @@ class cucmAxlWriter:
 
     factory = ''
     service = ''
+    __userFirstName = ''
+    __userLastName = ''
+    __usersAMAccountName = ''
+    __userDID = ''
+    __userEpriseExt = ''
 
     def __init__(self):
         myCucmConfig = cucmAxlConfig()
@@ -50,7 +55,7 @@ class cucmAxlWriter:
                             %(levelname)s - %(message)s')
         zeephandler.setFormatter(zeepformatter)
         zeeplogger.addHandler(zeephandler)
-        zeeplogger.info('Begin zeep Logging')
+        zeeplogger.info("Begin zeep Logging")
 
         cache = SqliteCache(path='/tmp/wsdlsqlite.db', timeout=60)
         transport = Transport(cache=cache)
@@ -79,3 +84,134 @@ class cucmAxlWriter:
             "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding",
             myCucmConfig.getCucmAxlUrl())
         logger.info("Service Created")
+
+    def __setuserFirstName(self, firstName):
+        self.__userFirstName = firstName
+
+    def __setuserLastName(self, lastName):
+        self.__userLastName = lastName
+
+    def __setusersAMAccountName(self, username):
+        self.__usersAMAccountName = username
+
+    def __setuserDID(self, did):
+        self.__userDID = did
+
+    def __setuserEpriseExt(self, extension):
+        self.__userEpriseExt = extension
+
+    def userExists(self, username):
+        try:
+            obtainedUser = self.service.getUser(userid=username)
+            logger.debug(obtainedUser)
+            # gather first/last name for Line / device
+            # obtainedFirstName = obtainedUser['return']['user']['firstName']
+            # obtainedLastName = obtainedUser['return']['user']['lastName']
+            # self.__setuserFirstName(obtainedFirstName)
+            # self.__setuserLastName(obtainedLastName)
+            # logger.debug("firstname: %s lastname: %s",
+            #              obtainedFirstName, obtainedLastName)
+            return True
+        except Exception as e:
+            # If user does not exist
+            logger.debug("User NOT found. Error=%s", e)
+            return False
+
+        # TODO   check LDAP sync time (can this be checked?
+        # GetLdapDirectoryReq ?
+        # getLdapSyncCustomField ?
+        # getLdapSyncCustomFieldResponse ?
+        # GetLdapSyncStatusReq !
+        # TODO   kick off LDAP Sync (maybe just do this always)
+        # TODO   Check LDAP sync time again?
+
+    def userAdd(self, username):
+        return True
+
+    def userUpdate(self, username):
+        return True
+
+    def lineExists(self, extension, partition='Phones'):
+        try:
+            getLine = self.service.getLine(pattern=extension,
+                                           routePartitionName=partition)
+            logger.info("getLine Completed")
+            logger.debug(getLine)
+            exit("Line Already Found")
+            return True
+        except Exception as e:
+            return False
+
+    def lineAdd(self, extension, partition='Phones', usage='Device'):
+        if not self.lineExists(extension):
+            try:
+                addlinepackage = self.factory.XLine()
+                addlinepackage.pattern = extension
+                addlinepackage.usage = usage
+                addlinepackage.routePartitionName = partition
+                logger.info("Line Factory Completed")
+                logger.debug(addlinepackage)
+
+                createdLine = self.service.addLine(addlinepackage)
+                logger.debug(createdLine)
+                logger.debug("Line Created")
+            except Exception as e:
+                logger.debug("Add Line Error. Server error=%s", e)
+                raise Exception("Line could not be added")
+            logger.info("Add Line Completed")
+
+    def lineUpdate(self, extension):
+        return True
+
+    def deviceExists(self, username):
+        try:
+            getPhone = self.service.getPhone(name='CSF'+username)
+            logger.info("getPhone Completed")
+            logger.debug(getPhone)
+            exit("Phone already Found")
+            return True
+        except Exception as e:
+            return False
+
+    def deviceAdd(self, username, extension, partition='Phones'):
+        deviceName = 'CSF'+username
+        if not self.deviceExists(deviceName):
+            try:
+                #  create device
+                #  join line to device
+                # directory number / line, required for a PhoneLine
+                # line must allready exist
+                tempDirN1 = self.factory.XDirn()
+                tempDirN1.pattern = extension
+                tempDirN1.routePartitionName = partition
+                logger.debug(tempDirN1)
+
+                # PhoneLine is how a DirectoryNumber and a Phone are merged
+                tempPhoneLine1 = self.factory.XPhoneLine()
+                tempPhoneLine1.index = 1
+                tempPhoneLine1.dirn = tempDirN1
+                logger.debug(tempPhoneLine1)
+
+                addphonepackage = self.factory.XPhone()
+                addphonepackage.name = deviceName
+                addphonepackage.product = 'Cisco Unified Client Services Framework'
+                addphonepackage.model = 'Cisco Unified Client Services Framework'
+                addphonepackage['class'] = 'Phone'
+                addphonepackage.protocol = 'SIP'
+                addphonepackage.commonPhoneConfigName = 'Standard Common Phone Profile'
+                addphonepackage.locationName = 'Hub_None'
+                addphonepackage.devicePoolName = 'CP Test Device Pool'
+                addphonepackage.lines = {'line': tempPhoneLine1}
+                addphonepackage.ownerUserName = username
+                addphonepackage.callingSearchSpaceName = 'Device - Seattle'
+                logger.debug(addphonepackage)
+                createdPhone = self.service.addPhone(addphonepackage)
+                logger.debug(createdPhone)
+                logger.debug("Phone Created")
+            except Exception as e:
+                logger.debug("Add Phone Error. Server error=%s", e)
+                raise Exception("Phone could not be added")
+                logger.info("Add Phone Completed")
+
+    def deviceUpdate(self, name):
+        return True
