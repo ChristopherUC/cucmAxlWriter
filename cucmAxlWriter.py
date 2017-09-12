@@ -29,11 +29,6 @@ class cucmAxlWriter:
 
     factory = ''
     service = ''
-    __userFirstName = ''
-    __userLastName = ''
-    __usersAMAccountName = ''
-    __userDID = ''
-    __userEpriseExt = ''
 
     def __init__(self):
         myCucmConfig = cucmAxlConfig()
@@ -87,39 +82,8 @@ class cucmAxlWriter:
             myCucmConfig.getCucmAxlUrl())
         logger.info("Service Created")
 
-    def __setuserFirstName(self, firstName):
-        self.__userFirstName = firstName
-
-    def __setuserLastName(self, lastName):
-        self.__userLastName = lastName
-
-    def __setusersAMAccountName(self, username):
-        self.__usersAMAccountName = username
-
-    def __setuserDID(self, did):
-        self.__userDID = did
-
-    def __setuserEpriseExt(self, extension):
-        self.__userEpriseExt = extension
-
-    def userExists(self, username):
-        try:
-            obtainedUser = self.service.getUser(userid=username)
-            logger.debug(obtainedUser)
-            # gather first/last name for Line / device
-            # obtainedFirstName = obtainedUser['return']['user']['firstName']
-            # obtainedLastName = obtainedUser['return']['user']['lastName']
-            # self.__setuserFirstName(obtainedFirstName)
-            # self.__setuserLastName(obtainedLastName)
-            # logger.debug("firstname: %s lastname: %s",
-            #              obtainedFirstName, obtainedLastName)
-            return True
-        except Exception as e:
-            # If user does not exist
-            logger.debug("User NOT found. Error=%s", e)
-            return False
-
-        # TODO   check LDAP sync time (can this be checked?
+    # TODO LDAP
+        # check LDAP sync time (can this be checked?)
         # GetLdapDirectoryReq ?
         # getLdapSyncCustomField ?
         # getLdapSyncCustomFieldResponse ?
@@ -127,8 +91,28 @@ class cucmAxlWriter:
         # TODO   kick off LDAP Sync (maybe just do this always)
         # TODO   Check LDAP sync time again?
 
+    def userGet(self, username):
+        try:
+            obtainedUser = self.service.getUser(userid=username)
+            logger.debug(obtainedUser)
+            return obtainedUser
+        except Exception as e:
+            # If user does not exist
+            logger.debug("User NOT found. Error=%s", e)
+            return False
+
+    def userExists(self, username):
+        try:
+            self.userGet(username)
+            return True
+        except Exception as e:
+            logger.debug("User NOT found. Error=%s", e)
+            return False
+
     def userAdd(self, username):
-        return True
+        # TODO : build for future if needed
+        # current users will be LDAP synced
+        return False
 
     def userUpdate(self, username, extension, partition='Phones'):
         deviceName = 'CSF'+username
@@ -143,23 +127,68 @@ class cucmAxlWriter:
     def userDelete(self, username):
         return True
 
-    def lineExists(self, extension, partition='Phones'):
+    def lineGet(self, extension, partition='Phones'):
         try:
             getLine = self.service.getLine(pattern=extension,
                                            routePartitionName=partition)
             logger.info("getLine Completed")
             logger.debug(getLine)
+            return getLine
+        except Exception as e:
+            return False
+
+    def lineExists(self, extension, partition='Phones'):
+        try:
+            self.lineGet(extension, partition)
             return True
         except Exception as e:
             return False
 
-    def lineAdd(self, extension, partition='Phones', usage='Device'):
+    def lineAdd(self, extension, firstname, lastname, vm='False',
+                partition='Phones', usage='Device'):
         if not self.lineExists(extension):
             try:
+                vmCss = 'Device - Seattle'
+                fwdAllCss = 'Device - Seattle'
+                vmConfig = {
+                    'forwardToVoiceMail': vm,
+                    'callingSearchSpaceName': vmCss}
+                nameString = firstname + " " + lastname
+
                 addlinepackage = self.factory.XLine()
                 addlinepackage.pattern = extension
                 addlinepackage.usage = usage
                 addlinepackage.routePartitionName = partition
+                addlinepackage.callForwardAll = {
+                    'forwardToVoiceMail': 'False',
+                    'callingSearchSpaceName': vmCss,
+                    'secondaryCallingSearchSpaceName': fwdAllCss}
+                addlinepackage.callForwardBusy = vmConfig
+                addlinepackage.callForwardBusyInt = vmConfig
+                addlinepackage.callForwardNoAnswer = vmConfig
+                addlinepackage.callForwardNoAnswerInt = vmConfig
+                addlinepackage.callForwardNoCoverage = vmConfig
+                addlinepackage.callForwardNoCoverageInt = vmConfig
+                addlinepackage.callForwardOnFailure = vmConfig
+                addlinepackage.callForwardAlternateParty = vmConfig
+                addlinepackage.callForwardNotRegistered = vmConfig
+                addlinepackage.callForwardNotRegisteredInt = vmConfig
+                # addlinepackage.voiceMailProfileName = vmProfileName
+                addlinepackage.addlinepackage.alertingName = nameString
+                addlinepackage.asciiAlertingName = nameString
+                '''
+                'e164AltNum': {
+                    'numMask': None,
+                    'isUrgent': 'f',
+                    'addLocalRoutePartition': 'f',
+                    'routePartition': {
+                        '_value_1': None,
+                        'uuid': None
+                    },
+                    'advertiseGloballyIls': 'f'
+                },
+                '''
+
                 logger.info("Line Factory Completed")
                 logger.debug(addlinepackage)
 
@@ -198,6 +227,9 @@ class cucmAxlWriter:
         deviceName = 'CSF'+username
         if not self.deviceExists(deviceName):
             try:
+                tempProduct = 'Cisco Unified Client Services Framework'
+                tempModel = 'Cisco Unified Client Services Framework'
+                tempPhoneConfigName = 'Standard Common Phone Profile'
                 #  create device
                 #  join line to device
                 # directory number / line, required for a PhoneLine
@@ -215,11 +247,11 @@ class cucmAxlWriter:
 
                 addphonepackage = self.factory.XPhone()
                 addphonepackage.name = deviceName
-                addphonepackage.product = 'Cisco Unified Client Services Framework'
-                addphonepackage.model = 'Cisco Unified Client Services Framework'
+                addphonepackage.product = tempProduct
+                addphonepackage.model = tempModel
                 addphonepackage['class'] = 'Phone'
                 addphonepackage.protocol = 'SIP'
-                addphonepackage.commonPhoneConfigName = 'Standard Common Phone Profile'
+                addphonepackage.commonPhoneConfigName = tempPhoneConfigName
                 addphonepackage.locationName = 'Hub_None'
                 addphonepackage.devicePoolName = site
                 addphonepackage.lines = {'line': tempPhoneLine1}
