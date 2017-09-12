@@ -20,6 +20,7 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - \
                                 %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+# logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.info("Begin cucmAxlWriter Info Logging")
 logger.debug("Begin cucmAxlWriter Debug Logging")
 
@@ -138,8 +139,12 @@ class cucmAxlWriter:
             return False
 
     def lineExists(self, extension, partition='Phones'):
+        logger.debug("lineExists Called")
         try:
-            self.lineGet(extension, partition)
+            getLine = self.service.getLine(pattern=extension,
+                                           routePartitionName=partition)
+            logger.debug(getLine)
+            logger.info("Line Exists")
             return True
         except Exception as e:
             return False
@@ -148,21 +153,22 @@ class cucmAxlWriter:
                 partition='Phones', usage='Device'):
         if not self.lineExists(extension):
             try:
-                vmCss = 'Device - Seattle'
-                fwdAllCss = 'Device - Seattle'
+                devCss = 'Device - Seattle'
+                lineCss = 'Class - International'
                 vmConfig = {
                     'forwardToVoiceMail': vm,
-                    'callingSearchSpaceName': vmCss}
+                    'callingSearchSpaceName': devCss}
                 nameString = firstname + " " + lastname
 
                 addlinepackage = self.factory.XLine()
                 addlinepackage.pattern = extension
                 addlinepackage.usage = usage
                 addlinepackage.routePartitionName = partition
+                addlinepackage.shareLineAppearanceCssName = lineCss
                 addlinepackage.callForwardAll = {
                     'forwardToVoiceMail': 'False',
-                    'callingSearchSpaceName': vmCss,
-                    'secondaryCallingSearchSpaceName': fwdAllCss}
+                    'callingSearchSpaceName': devCss,
+                    'secondaryCallingSearchSpaceName': lineCss}
                 addlinepackage.callForwardBusy = vmConfig
                 addlinepackage.callForwardBusyInt = vmConfig
                 addlinepackage.callForwardNoAnswer = vmConfig
@@ -174,8 +180,9 @@ class cucmAxlWriter:
                 addlinepackage.callForwardNotRegistered = vmConfig
                 addlinepackage.callForwardNotRegisteredInt = vmConfig
                 # addlinepackage.voiceMailProfileName = vmProfileName
-                addlinepackage.addlinepackage.alertingName = nameString
+                addlinepackage.alertingName = nameString
                 addlinepackage.asciiAlertingName = nameString
+                addlinepackage.description = nameString
                 '''
                 'e164AltNum': {
                     'numMask': None,
