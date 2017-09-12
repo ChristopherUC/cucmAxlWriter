@@ -131,13 +131,15 @@ class cucmAxlWriter:
     def userUpdate(self, username):
         return True
 
+    def userDelete(self, username):
+        return True
+
     def lineExists(self, extension, partition='Phones'):
         try:
             getLine = self.service.getLine(pattern=extension,
                                            routePartitionName=partition)
             logger.info("getLine Completed")
             logger.debug(getLine)
-            exit("Line Already Found")
             return True
         except Exception as e:
             return False
@@ -153,8 +155,8 @@ class cucmAxlWriter:
                 logger.debug(addlinepackage)
 
                 createdLine = self.service.addLine(addlinepackage)
-                logger.debug(createdLine)
                 logger.debug("Line Created")
+                logger.debug(createdLine)
             except Exception as e:
                 logger.debug("Add Line Error. Server error=%s", e)
                 raise Exception("Line could not be added")
@@ -163,12 +165,20 @@ class cucmAxlWriter:
     def lineUpdate(self, extension):
         return True
 
+    def lineDelete(self, extension, partition='Phones'):
+        try:
+            result = self.service.removeLine(pattern=extension,
+                                             routePartitionName=partition)
+            logging.info("Remove Line Completed")
+            logging.info(result)
+        except Exception as e:
+            logging.info(e)
+
     def deviceExists(self, username):
         try:
             getPhone = self.service.getPhone(name='CSF'+username)
             logger.info("getPhone Completed")
             logger.debug(getPhone)
-            exit("Phone already Found")
             return True
         except Exception as e:
             return False
@@ -213,5 +223,13 @@ class cucmAxlWriter:
                 raise Exception("Phone could not be added")
                 logger.info("Add Phone Completed")
 
-    def deviceUpdate(self, name):
+    def deviceUpdate(self, username):
         return True
+
+    def deviceDelete(self, username):
+        try:
+            result = self.service.removePhone(name='CSF' + username)
+            logging.info("Remove Phone Completed")
+            logging.info(result)
+        except Exception as e:
+            logging.info(e)
