@@ -183,7 +183,7 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def deviceAdd(self, username, extension, partition='Phones'):
+    def deviceAdd(self, username, extension, site, partition='Phones'):
         deviceName = 'CSF'+username
         if not self.deviceExists(deviceName):
             try:
@@ -210,10 +210,10 @@ class cucmAxlWriter:
                 addphonepackage.protocol = 'SIP'
                 addphonepackage.commonPhoneConfigName = 'Standard Common Phone Profile'
                 addphonepackage.locationName = 'Hub_None'
-                addphonepackage.devicePoolName = 'CP Test Device Pool'
+                addphonepackage.devicePoolName = site
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
-                addphonepackage.callingSearchSpaceName = 'Device - Seattle'
+                addphonepackage.callingSearchSpaceName = 'Device - ' + site
                 logger.debug(addphonepackage)
                 createdPhone = self.service.addPhone(addphonepackage)
                 logger.debug(createdPhone)
