@@ -130,8 +130,15 @@ class cucmAxlWriter:
     def userAdd(self, username):
         return True
 
-    def userUpdate(self, username):
-        return True
+    def userUpdate(self, username, extension, partition='Phones'):
+        deviceName = 'CSF'+username
+        result = self.service.updateUser(
+                        userid=username,
+                        associatedDevices={'device': deviceName},
+                        primaryExtension={'pattern': extension,
+                                          'routePartitionName': partition})
+        logger.info("Update User Completed")
+        logger.debug(result)
 
     def userDelete(self, username):
         return True
@@ -159,10 +166,12 @@ class cucmAxlWriter:
                 createdLine = self.service.addLine(addlinepackage)
                 logger.debug("Line Created")
                 logger.debug(createdLine)
+                logger.info("Add Line Completed")
             except Exception as e:
                 logger.debug("Add Line Error. Server error=%s", e)
                 raise Exception("Line could not be added")
-            logger.info("Add Line Completed")
+        else:
+            raise Exception("Line already exists")
 
     def lineUpdate(self, extension):
         return True
@@ -217,13 +226,15 @@ class cucmAxlWriter:
                 addphonepackage.ownerUserName = username
                 addphonepackage.callingSearchSpaceName = 'Device - ' + site
                 logger.debug(addphonepackage)
+
                 createdPhone = self.service.addPhone(addphonepackage)
                 logger.debug(createdPhone)
                 logger.debug("Phone Created")
+                logger.info("Add Phone Completed")
             except Exception as e:
                 logger.debug("Add Phone Error. Server error=%s", e)
-                raise Exception("Phone could not be added")
-                logger.info("Add Phone Completed")
+                # raise Exception("Phone could not be added")
+                raise Exception(e)
 
     def deviceUpdate(self, username):
         return True
