@@ -116,13 +116,19 @@ class cucmAxlWriter:
         # current users will be LDAP synced
         return False
 
-    def userUpdate(self, username, extension, partition='Phones'):
-        deviceName = 'CSF'+username
+    def userUpdate(self, username, extension, deviceList, partition='Phones'):
+        userGroups = ['Standard CTI Enabled',
+                      'Standard CCM End Users',
+                      'Standard CTI Allow Control of Phones supporting '
+                      + 'Connected Xfer and conf',
+                      'Standard CTI Allow Control of Phones supporting '
+                      + 'Rollover Mode']
         result = self.service.updateUser(
                         userid=username,
-                        associatedDevices={'device': deviceName},
+                        associatedDevices={'device': deviceList},
                         primaryExtension={'pattern': extension,
-                                          'routePartitionName': partition})
+                                          'routePartitionName': partition},
+                        associatedGroups={'userGroup': userGroups})
         cawLogger.info("Update User Completed")
         cawLogger.debug(result)
 
