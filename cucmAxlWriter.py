@@ -221,22 +221,51 @@ class cucmAxlWriter:
         except Exception as e:
             logging.info(e)
 
-    def deviceExists(self, username):
+    def deviceGetName(self, username, devicetype):
+        if devicetype == 'CSF':
+            deviceName = 'CSF'+username
+        elif devicetype == 'TCT':
+            deviceName = 'TCT'+username
+        elif devicetype == 'BOT':
+            deviceName = 'BOT'+username
+        elif devicetype == 'TAB':
+            deviceName = 'TAB'+username
+
+        deviceName = deviceName.upper()
+        return deviceName
+
+    def deviceExists(self, devicename):
         try:
-            getPhone = self.service.getPhone(name='CSF'+username)
+            getPhone = self.service.getPhone(name=devicename)
             logger.info("getPhone Completed")
             logger.debug(getPhone)
             return True
         except Exception as e:
             return False
 
-    def deviceAdd(self, username, extension, site, partition='Phones'):
-        deviceName = 'CSF'+username
+    def deviceAdd(self, username, extension, site, devicetype,
+                  partition='Phones'):
+
+        deviceName = self.deviceGetName(username, devicetype)
+        tempPhoneConfigName = 'Standard Common Phone Profile'
+
+        if devicetype == 'CSF':
+            tempProduct = 'Cisco Unified Client Services Framework'
+            tempModel = 'Cisco Unified Client Services Framework'
+        elif devicetype == 'TCT':
+            tempProduct = 'Cisco Dual Mode for iPhone'
+            tempModel = 'Cisco Dual Mode for iPhone'
+        elif devicetype == 'BOT':
+            tempProduct = 'Cisco Dual Mode for Android'
+            tempModel = 'Cisco Dual Mode for Android'
+        elif devicetype == 'TAB':
+            tempProduct = 'Cisco Jabber for Tablet'
+            tempModel = 'Cisco Jabber for Tablet'
+        else:
+            raise Exception("Invalid Device Type Specified, unrecoverable")
+
         if not self.deviceExists(deviceName):
             try:
-                tempProduct = 'Cisco Unified Client Services Framework'
-                tempModel = 'Cisco Unified Client Services Framework'
-                tempPhoneConfigName = 'Standard Common Phone Profile'
                 #  create device
                 #  join line to device
                 # directory number / line, required for a PhoneLine
@@ -278,9 +307,10 @@ class cucmAxlWriter:
     def deviceUpdate(self, username):
         return True
 
-    def deviceDelete(self, username):
+    def deviceDelete(self, username, devicetype):
+        deviceName = self.deviceGetName(username, devicetype)
         try:
-            result = self.service.removePhone(name='CSF' + username)
+            result = self.service.removePhone(name=deviceName)
             logging.info("Remove Phone Completed")
             logging.info(result)
         except Exception as e:
