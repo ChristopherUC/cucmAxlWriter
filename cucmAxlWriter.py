@@ -2,6 +2,7 @@
 __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
+import sys
 import logging
 from cucmAxlConfig import cucmAxlConfig
 from zeep import Client
@@ -190,25 +191,6 @@ class cucmAxlWriter:
                 addlinepackage.alertingName = nameString
                 addlinepackage.asciiAlertingName = nameString
                 addlinepackage.description = nameString
-                '''addlinepackage.e164AltNum = {'numMask': '+1509714XXXX',
-                                             'isUrgent': 'false',
-                                             'addLocalRoutePartition': 'false',
-                                             'routePartition': {
-                                                 '_value_1': None,
-                                                 'uuid': None},
-                                             'advertiseGloballyIls': 'true'}'''
-                '''
-                'e164AltNum': {
-                    'numMask': None,
-                    'isUrgent': 'f',
-                    'addLocalRoutePartition': 'f',
-                    'routePartition': {
-                        '_value_1': None,
-                        'uuid': None
-                    },
-                    'advertiseGloballyIls': 'f'
-                },
-                '''
 
                 cawLogger.info("Line Factory Completed")
                 cawLogger.debug(addlinepackage)
@@ -223,8 +205,16 @@ class cucmAxlWriter:
         else:
             raise Exception("Line already exists")
 
-    def lineUpdate(self, extension):
-        return True
+    def lineUpdate(self, extension, did):
+        result = self.service.updateLine(pattern=extension,
+                                         e164AltNum={'numMask': '+1' + did,
+                                                     'isUrgent': 'false',
+                                                     'addLocalRoutePartition':
+                                                     'false',
+                                                     'advertiseGloballyIls':
+                                                     'true'})
+        cawLogger.info("UpdateUser Completed")
+        cawLogger.debug(result)
 
     def lineDelete(self, extension, partition='Phones'):
         try:
