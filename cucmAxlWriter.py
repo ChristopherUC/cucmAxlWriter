@@ -190,6 +190,13 @@ class cucmAxlWriter:
                 addlinepackage.alertingName = nameString
                 addlinepackage.asciiAlertingName = nameString
                 addlinepackage.description = nameString
+                '''addlinepackage.e164AltNum = {'numMask': '+1509714XXXX',
+                                             'isUrgent': 'false',
+                                             'addLocalRoutePartition': 'false',
+                                             'routePartition': {
+                                                 '_value_1': None,
+                                                 'uuid': None},
+                                             'advertiseGloballyIls': 'true'}'''
                 '''
                 'e164AltNum': {
                     'numMask': None,
@@ -241,6 +248,15 @@ class cucmAxlWriter:
         deviceName = deviceName.upper()
         return deviceName
 
+    def deviceGet(self, devicename):
+        try:
+            getDevice = self.service.getPhone(name=devicename)
+            cawLogger.info("getDevice Completed")
+            cawLogger.debug(getDevice)
+            return getDevice
+        except Exception as e:
+            return False
+
     def deviceExists(self, devicename):
         try:
             getPhone = self.service.getPhone(name=devicename)
@@ -286,6 +302,8 @@ class cucmAxlWriter:
                 tempPhoneLine1 = self.factory.XPhoneLine()
                 tempPhoneLine1.index = 1
                 tempPhoneLine1.dirn = tempDirN1
+                tempPhoneLine1.associatedEndusers = {'enduser': {'userId': username}}
+
                 cawLogger.debug(tempPhoneLine1)
 
                 addphonepackage = self.factory.XPhone()
