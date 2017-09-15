@@ -154,7 +154,8 @@ class cucmJabberWriter:
             self.myCucmAxlWriter.lineAdd(self.getEpriseExt(),
                                          self.getFirstName(),
                                          self.getLastName(),
-                                         self.getVM())
+                                         self.getSite(),
+                                         vm=self.getVM())
             cjwLogger.info("createJabberLine Completed")
         else:
             cjwLogger.info("createJabberLine already exists")
