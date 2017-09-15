@@ -129,7 +129,8 @@ class cucmAxlWriter:
                         associatedDevices={'device': deviceList},
                         primaryExtension={'pattern': extension,
                                           'routePartitionName': partition},
-                        associatedGroups={'userGroup': userGroups})
+                        associatedGroups={'userGroup': userGroups},
+                        imAndPresenceEnable='true')
         cawLogger.info("Update User Completed")
         cawLogger.debug(result)
 
@@ -157,11 +158,11 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def lineAdd(self, extension, firstname, lastname, vm='False',
+    def lineAdd(self, extension, firstname, lastname, site, vm='False',
                 partition='Phones', usage='Device'):
         if not self.lineExists(extension):
             try:
-                devCss = 'Device - Seattle'
+                devCss = 'Device - '+site
                 lineCss = 'Class - International'
                 vmConfig = {
                     'forwardToVoiceMail': vm,
@@ -304,7 +305,7 @@ class cucmAxlWriter:
                 addphonepackage.protocol = 'SIP'
                 addphonepackage.commonPhoneConfigName = tempPhoneConfigName
                 addphonepackage.locationName = 'Hub_None'
-                addphonepackage.devicePoolName = site
+                addphonepackage.devicePoolName = 'DP_'+site
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
                 addphonepackage.callingSearchSpaceName = 'Device - ' + site
