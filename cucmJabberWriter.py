@@ -2,7 +2,7 @@
 __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
-import sys
+# import sys
 import logging
 from cucmAxlWriter import cucmAxlWriter
 
@@ -18,7 +18,7 @@ infoHandler.setFormatter(formatter)
 debugHandler.setFormatter(formatter)
 cjwLogger.addHandler(infoHandler)
 cjwLogger.addHandler(debugHandler)
-cjwLogger.addHandler(logging.StreamHandler(sys.stdout))
+# cjwLogger.addHandler(logging.StreamHandler(sys.stdout))
 cjwLogger.info("Begin JabberWriter Info Logging")
 cjwLogger.debug("Begin JabberWriter Debug Logging")
 
