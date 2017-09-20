@@ -65,14 +65,14 @@ class cupiRestWriter:
                           EmailAddress, SmtpAddress, DtmfAccessId)
         return newUserXml
 
-    def createNewVoicemail(self, newUserXml):
+    def createNewVoicemail(self):
         vmCreateUrl = 'users?templateAlias=' + self.template
         url = self.myCxnConfig.getCxnRestlUrl() + vmCreateUrl
         resp = requests.post(url,
                              auth=(self.myCxnConfig.getCxnUsername(),
                                    self.myCxnConfig.getCxnPassword()),
                              verify=False,
-                             data=newUserXml,
+                             data=self.__newUserXml,
                              headers=self.headers)
         if resp.status_code != 201:
             # This means something went wrong.
