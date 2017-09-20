@@ -5,8 +5,6 @@ __author__ = 'Christopher Phillips'
 import sys
 import logging
 import requests
-# from requests import Session
-# from requests.auth import HTTPBasicAuth
 from cupiRestConfig import cupiRestConfig
 
 import urllib3  # imported to disable the SAN warning for the cert
@@ -31,7 +29,8 @@ cupiRLogger.debug("Begin CUPI Writer Debug Logging")
 
 class cupiRestWriter:
 
-    headers = {'Content-Type': 'application/xml'}  # server accepts
+    headers = {'Content-Type': 'application/xml', 'Accept': 'application/json'}
+    # server accepts XML, we request JSON in response
     template = 'voicemailusertemplate'
     myCxnConfig = ''
     __newUserXml = ''
@@ -66,6 +65,7 @@ class cupiRestWriter:
         return newUserXml
 
     def createNewVoicemail(self):
+        cupiRLogger.info("Create Voicemail Started")
         vmCreateUrl = 'users?templateAlias=' + self.template
         url = self.myCxnConfig.getCxnRestlUrl() + vmCreateUrl
         resp = requests.post(url,
@@ -92,5 +92,35 @@ class cupiRestWriter:
             raise Exception('POST /{0} {1}'.format(getTemplateUrl,
                             resp.status_code))
 
-    def deleteVoicemail(self):
-        pass
+    def getVmObjectId(self, alias):
+        # accept = 'Accept: application/json'
+        vmGetUrl = 'users?query=(alias is {0})'.format(alias)
+        url = self.myCxnConfig.getCxnRestlUrl() + vmGetUrl
+        resp = requests.get(url,
+                            auth=(self.myCxnConfig.getCxnUsername(),
+                                  self.myCxnConfig.getCxnPassword()),
+                            verify=False,
+                            headers=self.headers,
+                            # accept=accept
+                            )
+        data = resp.json()
+        return data['User']['ObjectId']
+        if resp.status_code != 200:
+            # This means something went wrong.
+            raise Exception('GET /{0} {1}'.format(vmGetUrl,
+                                                  resp.status_code))
+
+    def deleteVoicemail(self, alias):
+        cupiRLogger.info("Delete Voicemail Started")
+        userObjectId = self.getVmObjectId(alias)
+        vmDeleteUrl = 'users/' + userObjectId
+        url = self.myCxnConfig.getCxnRestlUrl() + vmDeleteUrl
+        resp = requests.delete(url,
+                               auth=(self.myCxnConfig.getCxnUsername(),
+                                     self.myCxnConfig.getCxnPassword()),
+                               verify=False,
+                               headers=self.headers)
+        if resp.status_code != 204:
+            # This means something went wrong.
+            raise Exception('Delete /{0} {1}'.format(vmDeleteUrl,
+                                                     resp.status_code))
