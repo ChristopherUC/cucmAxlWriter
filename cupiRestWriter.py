@@ -2,7 +2,7 @@
 __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
-import sys
+# import sys
 import logging
 import requests
 from cupiRestConfig import cupiRestConfig
@@ -22,7 +22,7 @@ infoHandler.setFormatter(formatter)
 debugHandler.setFormatter(formatter)
 cupiRLogger.addHandler(infoHandler)
 cupiRLogger.addHandler(debugHandler)
-cupiRLogger.addHandler(logging.StreamHandler(sys.stdout))
+# cupiRLogger.addHandler(logging.StreamHandler(sys.stdout))
 cupiRLogger.info("Begin CUPI Writer Info Logging")
 cupiRLogger.debug("Begin CUPI Writer Debug Logging")
 
