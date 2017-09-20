@@ -2,7 +2,7 @@
 __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
-import sys
+# import sys
 import logging
 from cucmAxlConfig import cucmAxlConfig
 from zeep import Client
@@ -221,10 +221,10 @@ class cucmAxlWriter:
         try:
             result = self.service.removeLine(pattern=extension,
                                              routePartitionName=partition)
-            logging.info("Remove Line Completed")
-            logging.info(result)
+            cawLogger.info("Remove Line Completed")
+            cawLogger.info(result)
         except Exception as e:
-            logging.info(e)
+            cawLogger.info(e)
 
     def deviceGetName(self, username, devicetype):
         if devicetype == 'CSF':
@@ -327,7 +327,7 @@ class cucmAxlWriter:
         deviceName = self.deviceGetName(username, devicetype)
         try:
             result = self.service.removePhone(name=deviceName)
-            logging.info("Remove Phone Completed")
-            logging.info(result)
+            cawLogger.info("Remove Phone Completed")
+            cawLogger.info(result)
         except Exception as e:
-            logging.info(e)
+            cawLogger.info(e)
