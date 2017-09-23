@@ -36,6 +36,7 @@ class cupiRestWriter:
     __baseUrl = ''
     __newUserXml = ''
     __auth = ''
+    __verify = ''
 
     def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress):
         cupiRLogger.info("Rest Writer Started")
@@ -50,6 +51,7 @@ class cupiRestWriter:
         self.__baseUrl = self.myCxnConfig.getAppApiUrl()
         self.__auth = (self.myCxnConfig.getAppUsername(),
                        self.myCxnConfig.getAppPassword())
+        self.__verify = self.myCxnConfig.getAppCert()
 
     def genNewUserXML(self, FirstName, LastName, Alias, EmailAddress,
                       DtmfAccessId):
@@ -74,9 +76,8 @@ class cupiRestWriter:
         vmCreateUrl = 'users?templateAlias=' + self.template
         url = self.__baseUrl + vmCreateUrl
         resp = requests.post(url,
-                             auth=(self.myCxnConfig.getAppUsername(),
-                                   self.myCxnConfig.getAppPassword()),
-                             verify=False,
+                             auth=self.__auth,
+                             verify=self.__verify,
                              data=self.__newUserXml,
                              headers=self.headers)
         if resp.status_code != 201:
@@ -88,9 +89,8 @@ class cupiRestWriter:
         getTemplateUrl = 'usertemplates'
         url = self.__baseUrl + getTemplateUrl
         resp = requests.post(url,
-                             auth=(self.myCxnConfig.getAppUsername(),
-                                   self.myCxnConfig.getAppPassword()),
-                             verify=False,
+                             auth=self.__auth,
+                             verify=self.__verify,
                              headers=self.headers)
         if resp.status_code != 201:
             # This means something went wrong.
@@ -102,9 +102,8 @@ class cupiRestWriter:
         vmGetUrl = 'users?query=(alias is {0})'.format(alias)
         url = self.__baseUrl + vmGetUrl
         resp = requests.get(url,
-                            auth=(self.myCxnConfig.getAppUsername(),
-                                  self.myCxnConfig.getAppPassword()),
-                            verify=False,
+                            auth=self.__auth,
+                            verify=self.__verify,
                             headers=self.headers,
                             # accept=accept
                             )
@@ -121,9 +120,8 @@ class cupiRestWriter:
         vmDeleteUrl = 'users/' + userObjectId
         url = self.__baseUrl + vmDeleteUrl
         resp = requests.delete(url,
-                               auth=(self.myCxnConfig.getAppUsername(),
-                                     self.myCxnConfig.getAppPassword()),
-                               verify=False,
+                               auth=self.__auth,
+                               verify=self.__verify,
                                headers=self.headers)
         if resp.status_code != 204:
             # This means something went wrong.
