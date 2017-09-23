@@ -117,9 +117,11 @@ class configCreator(appConfig):
                     verify = True
                 else:
                     verify = False
+                    self.__setAppCert(False)
             else:
                 confLogger.debug("Bypassing certificate download")
                 verify = False
+                self.__setAppCert(False)
 
         data = {'username': username, 'password': password, 'url': url,
                 'verify': verify, 'verifyFile': self.getAppCert()}
@@ -128,5 +130,4 @@ class configCreator(appConfig):
 
 
 print("Generating a new ", options.filename)
-
 myConfig = configCreator(options.filename)
