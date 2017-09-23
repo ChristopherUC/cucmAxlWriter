@@ -5,7 +5,7 @@ __author__ = 'Christopher Phillips'
 # import sys
 import logging
 import requests
-from ucAppConfig import ucAppConfig
+from ucAppConfig import cxnAppConfig
 
 import urllib3  # imported to disable the SAN warning for the cert
 urllib3.disable_warnings(urllib3.exceptions.SubjectAltNameWarning)
@@ -39,7 +39,7 @@ class cupiRestWriter:
 
     def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress):
         cupiRLogger.info("Rest Writer Started")
-        self.myCxnConfig = ucAppConfig('cxn.cfg')
+        self.myCxnConfig = cxnAppConfig('cxn.cfg')
 
         self.__newUserXml = self.genNewUserXML(FirstName,
                                                LastName,
