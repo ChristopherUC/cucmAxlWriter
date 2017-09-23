@@ -5,7 +5,7 @@ __author__ = 'Christopher Phillips'
 # import sys
 import logging
 import requests
-from cupiRestConfig import cupiRestConfig
+from ucAppConfig import ucAppConfig
 
 import urllib3  # imported to disable the SAN warning for the cert
 urllib3.disable_warnings(urllib3.exceptions.SubjectAltNameWarning)
@@ -33,11 +33,13 @@ class cupiRestWriter:
     # server accepts XML, we request JSON in response
     template = 'voicemailusertemplate'
     myCxnConfig = ''
+    __baseUrl = ''
     __newUserXml = ''
+    __auth = ''
 
     def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress):
         cupiRLogger.info("Rest Writer Started")
-        self.myCxnConfig = cupiRestConfig()
+        self.myCxnConfig = ucAppConfig('cxn.cfg')
 
         self.__newUserXml = self.genNewUserXML(FirstName,
                                                LastName,
@@ -45,11 +47,14 @@ class cupiRestWriter:
                                                EmailAddress,
                                                Extension)
         cupiRLogger.debug(self.__newUserXml)
+        self.__baseUrl = self.myCxnConfig.getAppApiUrl()
+        self.__auth = (self.myCxnConfig.getAppUsername(),
+                       self.myCxnConfig.getAppPassword())
 
     def genNewUserXML(self, FirstName, LastName, Alias, EmailAddress,
                       DtmfAccessId):
         DisplayName = FirstName + " " + LastName
-        SmtpAddress = Alias + "@" + self.myCxnConfig.getCxnUrl()
+        SmtpAddress = Alias + "@" + self.myCxnConfig.getAppHost()
 
         newUserXml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
         <User>
@@ -67,24 +72,24 @@ class cupiRestWriter:
     def createNewVoicemail(self):
         cupiRLogger.info("Create Voicemail Started")
         vmCreateUrl = 'users?templateAlias=' + self.template
-        url = self.myCxnConfig.getCxnRestlUrl() + vmCreateUrl
+        url = self.__baseUrl + vmCreateUrl
         resp = requests.post(url,
-                             auth=(self.myCxnConfig.getCxnUsername(),
-                                   self.myCxnConfig.getCxnPassword()),
+                             auth=(self.myCxnConfig.getAppUsername(),
+                                   self.myCxnConfig.getAppPassword()),
                              verify=False,
                              data=self.__newUserXml,
                              headers=self.headers)
         if resp.status_code != 201:
             # This means something went wrong.
-            raise Exception('POST /{0} {1}'.format(vmCreateUrl,
+            raise Exception('POST /{0} {1}'.format(url,
                                                    resp.status_code))
 
     def getTemplate(self):
         getTemplateUrl = 'usertemplates'
-        url = self.myCxnConfig.getCxnRestlUrl() + getTemplateUrl
+        url = self.__baseUrl + getTemplateUrl
         resp = requests.post(url,
-                             auth=(self.myCxnConfig.getCxnUsername(),
-                                   self.myCxnConfig.getCxnPassword()),
+                             auth=(self.myCxnConfig.getAppUsername(),
+                                   self.myCxnConfig.getAppPassword()),
                              verify=False,
                              headers=self.headers)
         if resp.status_code != 201:
@@ -95,10 +100,10 @@ class cupiRestWriter:
     def getVmObjectId(self, alias):
         # accept = 'Accept: application/json'
         vmGetUrl = 'users?query=(alias is {0})'.format(alias)
-        url = self.myCxnConfig.getCxnRestlUrl() + vmGetUrl
+        url = self.__baseUrl + vmGetUrl
         resp = requests.get(url,
-                            auth=(self.myCxnConfig.getCxnUsername(),
-                                  self.myCxnConfig.getCxnPassword()),
+                            auth=(self.myCxnConfig.getAppUsername(),
+                                  self.myCxnConfig.getAppPassword()),
                             verify=False,
                             headers=self.headers,
                             # accept=accept
@@ -114,10 +119,10 @@ class cupiRestWriter:
         cupiRLogger.info("Delete Voicemail Started")
         userObjectId = self.getVmObjectId(alias)
         vmDeleteUrl = 'users/' + userObjectId
-        url = self.myCxnConfig.getCxnRestlUrl() + vmDeleteUrl
+        url = self.__baseUrl + vmDeleteUrl
         resp = requests.delete(url,
-                               auth=(self.myCxnConfig.getCxnUsername(),
-                                     self.myCxnConfig.getCxnPassword()),
+                               auth=(self.myCxnConfig.getAppUsername(),
+                                     self.myCxnConfig.getAppPassword()),
                                verify=False,
                                headers=self.headers)
         if resp.status_code != 204:
