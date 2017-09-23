@@ -25,41 +25,41 @@ class ccmAppConfig(appConfig):
 
     def __init__(self, cfgFileName):
         appConfig.__init__(self, cfgFileName)
-        self.__appCfgFileName = cfgFileName
-        appCfgFileFound = self.checkFileExists(self.__appCfgFileName,
-                                               self.__localDir)
+        self._appCfgFileName = cfgFileName
+        appCfgFileFound = self.checkFileExists(self._appCfgFileName,
+                                               self._localDir)
         if not appCfgFileFound:
             print("The specified Config file was not found.")
             print("Generate a new config file using configCreator.py")
             raise Exception("Config File NOT found. Unrecoverable error.")
-        self.__appCfgFileName = os.path.join(self.__localDir,
-                                             self.__appCfgFileName)
-        self.__loadAppCfgFile(self.__appCfgFileName)
+        self._appCfgFileName = os.path.join(self._localDir,
+                                            self._appCfgFileName)
+        self._loadAppCfgFile(self._appCfgFileName)
 
-        if 'ucm' in self.__appCfgFileName:
-            wsdlFileFound = self.checkFileExists(self.__wsdlFileName,
-                                                 self.__localDir)
+        if 'ucm' in self._appCfgFileName:
+            wsdlFileFound = self.checkFileExists(self._wsdlFileName,
+                                                 self._localDir)
             if not wsdlFileFound:
                 logger.error("This version of cucmAxlWriter is expecting" +
                              " the UCM 11.5 WSDL file.")
                 logger.error("If you choose to use a different version of" +
                              "the WSDL your results may vary.")
                 logger.error("The 11.5 version WSDL file must be placed in %s",
-                             os.path.join(self.__localDir,
-                                          self.__wsdlFileName))
+                             os.path.join(self._localDir,
+                                          self._wsdlFileName))
                 raise Exception("WSDL File NOT found. Unrecoverable error.")
             else:
-                self.__wsdlFileName = os.path.join(self.__localDir,
-                                                   self.__wsdlFileName)
+                self._wsdlFileName = os.path.join(self._localDir,
+                                                  self._wsdlFileName)
 
     def getwsdlFileName(self):
-        return self.__wsdlFileName
+        return self._wsdlFileName
 
     def getAppApiUrl(self):
         return 'https://{0}:8443/axl/'.format(self.getAppHost())
 
-    def __setAppUrl(self, ipOrHostname):
-        self.__appUrl = ipOrHostname
+    def _setAppUrl(self, ipOrHostname):
+        self._appUrl = ipOrHostname
 
 
 class cxnAppConfig(appConfig):
@@ -67,19 +67,19 @@ class cxnAppConfig(appConfig):
 
     def __init__(self, cfgFileName):
         appConfig.__init__(self, cfgFileName)
-        self.__appCfgFileName = cfgFileName
-        appCfgFileFound = self.checkFileExists(self.__appCfgFileName,
-                                               self.__localDir)
+        self._appCfgFileName = cfgFileName
+        appCfgFileFound = self.checkFileExists(self._appCfgFileName,
+                                               self._localDir)
         if not appCfgFileFound:
             print("The specified Config file was not found.")
             print("Generate a new config file using configCreator.py")
             raise Exception("Config File NOT found. Unrecoverable error.")
-        self.__appCfgFileName = os.path.join(self.__localDir,
-                                             self.__appCfgFileName)
-        self.__loadAppCfgFile(self.__appCfgFileName)
+        self._appCfgFileName = os.path.join(self._localDir,
+                                            self._appCfgFileName)
+        self._loadAppCfgFile(self._appCfgFileName)
 
     def getAppApiUrl(self):
         return 'https://{0}/vmrest/'.format(self.getAppHost())
 
-    def __setAppUrl(self, ipOrHostname):
-        self.__appUrl = ipOrHostname
+    def _setAppUrl(self, ipOrHostname):
+        self._appUrl = ipOrHostname
