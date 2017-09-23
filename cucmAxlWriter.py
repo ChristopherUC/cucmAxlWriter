@@ -4,7 +4,7 @@ __author__ = 'Christopher Phillips'
 
 # import sys
 import logging
-from cucmAxlConfig import cucmAxlConfig
+from ucAppConfig import ucAppConfig
 from zeep import Client
 from zeep.cache import SqliteCache
 from zeep.transports import Transport
@@ -33,19 +33,7 @@ class cucmAxlWriter:
     service = ''
 
     def __init__(self):
-        myCucmConfig = cucmAxlConfig()
-
-        cawLogger.debug("current CUCM username is %s",
-                        myCucmConfig.getCucmUsername())
-        cawLogger.debug("current CUCM password is %s",
-                        myCucmConfig.getCucmPassword())
-        cawLogger.debug("current CUCM url is %s", myCucmConfig.getCucmUrl())
-        cawLogger.debug("current CUCM axlurl is %s",
-                        myCucmConfig.getCucmAxlUrl())
-        cawLogger.debug("current CUCM verify mode is %s",
-                        myCucmConfig.getCucmVerify())
-        cawLogger.debug("current CUCM Cert File  is %s",
-                        myCucmConfig.getCucmCert())
+        myCucmConfig = ucAppConfig('ucm.cfg')
 
         zeeplogger = logging.getLogger('zeep.transports')
         zeeplogger.setLevel(logging.DEBUG)
@@ -62,15 +50,15 @@ class cucmAxlWriter:
         client = Client(myCucmConfig.getwsdlFileName(), transport=transport)
 
         session = Session()
-        if myCucmConfig.getCucmVerify():
+        if myCucmConfig.getAppVerify():
             cawLogger.info("Session Security ENABLED")
-            session.verify = myCucmConfig.getCucmCert()
+            session.verify = myCucmConfig.getAppCert()
         else:
             cawLogger.info("Session Security DISABLED")
-            session.verify = myCucmConfig.getCucmVerify()
+            session.verify = myCucmConfig.getAppVerify()
         cawLogger.info("Session Created")
-        session.auth = HTTPBasicAuth(myCucmConfig.getCucmUsername(),
-                                     myCucmConfig.getCucmPassword())
+        session.auth = HTTPBasicAuth(myCucmConfig.getAppUsername(),
+                                     myCucmConfig.getAppPassword())
         cawLogger.info("Auth Created")
 
         client = Client(wsdl=myCucmConfig.getwsdlFileName(),
@@ -82,7 +70,7 @@ class cucmAxlWriter:
 
         self.service = client.create_service(
             "{http://www.cisco.com/AXLAPIService/}AXLAPIBinding",
-            myCucmConfig.getCucmAxlUrl())
+            myCucmConfig.getAppApiUrl())
         cawLogger.info("Service Created")
 
     # TODO LDAP
