@@ -4,7 +4,7 @@ __author__ = 'Christopher Phillips'
 
 # import sys
 import logging
-from ucAppConfig import ucAppConfig
+from ucAppConfig import ccmAppConfig
 from zeep import Client
 from zeep.cache import SqliteCache
 from zeep.transports import Transport
@@ -33,7 +33,7 @@ class cucmAxlWriter:
     service = ''
 
     def __init__(self):
-        myCucmConfig = ucAppConfig('ucm.cfg')
+        myCucmConfig = ccmAppConfig('ucm.cfg')
 
         zeeplogger = logging.getLogger('zeep.transports')
         zeeplogger.setLevel(logging.DEBUG)
