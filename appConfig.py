@@ -109,8 +109,8 @@ class appConfig:
                 self._setAppUsername(appCfg['username'])
                 self._setAppPassword(appCfg['password'])
                 self._setAppHost(appCfg['url'])
-                self._setAppVerify(appCfg['verify'])
                 self._setAppCert(appCfg['verifyFile'])
+                self._setAppVerify(appCfg['verify'])
                 appConfLogger.debug("File Read successfully")
         except Exception as e:
             appConfLogger.debug("Unable to open Config file")
