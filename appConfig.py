@@ -91,6 +91,8 @@ class appConfig:
             if not certFileExists:
                 raise Exception("Verify=True but no cert file exists: %s",
                                 self._appCertFileName)
+        else:
+            self._setAppCert(False)
 
     def getAppCert(self):
         return self._appCertFileName
