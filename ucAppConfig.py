@@ -3,9 +3,8 @@ __version__ = '0.4'
 __author__ = 'Christopher Phillips'
 
 import os  # directories
-import sys
 import logging  # debug
-import json  # config file read/write
+from appConfig import appConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -18,20 +17,14 @@ logger.addHandler(handler)
 logger.info("Begin ucAppConfig Logging")
 
 
-class ucAppConfig:
+class ccmAppConfig(appConfig):
     # holds config data for connection to UC Apps
 
     # default /axlsqltoolkit/schema/current/AXLAPI.wsdl
-    __wsdlFileName = 'axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
-    __appCfgFileName = ''
-    __appCertFileName = ''
-    __appUrl = ''
-    __appUsername = ''
-    __appPassword = ''
-    __appVerify = ''
-    __localDir = os.getcwd()
+    _wsdlFileName = 'axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
 
     def __init__(self, cfgFileName):
+        appConfig.__init__(self, cfgFileName)
         self.__appCfgFileName = cfgFileName
         appCfgFileFound = self.checkFileExists(self.__appCfgFileName,
                                                self.__localDir)
@@ -59,77 +52,34 @@ class ucAppConfig:
                 self.__wsdlFileName = os.path.join(self.__localDir,
                                                    self.__wsdlFileName)
 
-    def checkFileExists(self, filename, directory):
-        if not filename.startswith(directory):
-            fileLocation = os.path.join(directory, filename)
-        else:
-            fileLocation = filename
-        logger.debug("Checking for %s file in %s", filename, directory)
-        fileExists = os.path.isfile(fileLocation)
-        logger.debug("%s Exists=%s", filename, fileExists)
-        if not fileExists:
-            logger.debug("%s NOT Found", fileLocation)
-            return fileExists
-        logger.debug("%s file found", filename)
-        return fileExists
-
     def getwsdlFileName(self):
         return self.__wsdlFileName
 
-    def getAppUsername(self):
-        return self.__appUsername
-
-    def __setAppUsername(self, username):
-        self.__appUsername = username
-
-    def getAppPassword(self):
-        return self.__appPassword
-
-    def __setAppPassword(self, password):
-        self.__appPassword = password
-
-    def getAppHost(self):
-        return self.__appHost
-
-    def __setAppHost(self, ipOrHostname):
-        self.__appHost = ipOrHostname
-
     def getAppApiUrl(self):
-        if 'ucm.cfg' in self.getAppCfgFileName():
-            return 'https://{0}:8443/axl/'.format(self.getAppHost())
-        if 'cxn.cfg' in self.getAppCfgFileName():
-            return 'https://{0}/vmrest/'.format(self.getAppHost())
+        return 'https://{0}:8443/axl/'.format(self.getAppHost())
 
     def __setAppUrl(self, ipOrHostname):
         self.__appUrl = ipOrHostname
 
-    def getAppVerify(self):
-        return self.__appVerify
 
-    def __setAppVerify(self, verify):
-        self.__appVerify = verify
+class cxnAppConfig(appConfig):
+    # holds config data for connection to UC Apps
 
-    def getAppCert(self):
-        return self.__appCertFileName
+    def __init__(self, cfgFileName):
+        appConfig.__init__(self, cfgFileName)
+        self.__appCfgFileName = cfgFileName
+        appCfgFileFound = self.checkFileExists(self.__appCfgFileName,
+                                               self.__localDir)
+        if not appCfgFileFound:
+            print("The specified Config file was not found.")
+            print("Generate a new config file using configCreator.py")
+            raise Exception("Config File NOT found. Unrecoverable error.")
+        self.__appCfgFileName = os.path.join(self.__localDir,
+                                             self.__appCfgFileName)
+        self.__loadAppCfgFile(self.__appCfgFileName)
 
-    def __setAppCert(self, certFileName):
-        self.__appCertFileName = certFileName
+    def getAppApiUrl(self):
+        return 'https://{0}/vmrest/'.format(self.getAppHost())
 
-    def getAppCfgFileName(self):
-        return self.__appCfgFileName
-
-    def __loadAppCfgFile(self, filename):
-        logger.debug("Reading from file")
-        try:
-            with open(filename) as appCfgFile:
-                newCfg = json.load(appCfgFile)
-                self.__setAppUsername(newCfg['username'])
-                self.__setAppPassword(newCfg['password'])
-                self.__setAppHost(newCfg['url'])
-                self.__setAppVerify(newCfg['verify'])
-                self.__setAppCert(newCfg['verifyFile'])
-                logger.debug("File Read successfully")
-        except Exception as e:
-            logger.debug("Unable to open Config file")
-            # os.remove(self.getAppCfgFileName())
-            sys.exit(e)
+    def __setAppUrl(self, ipOrHostname):
+        self.__appUrl = ipOrHostname
