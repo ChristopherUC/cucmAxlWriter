@@ -245,9 +245,11 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def deviceAdd(self, username, extension, site, devicetype,
-                  partition='Phones'):
+    def deviceAdd(self, username, firstname, lastname, extension, did, site,
+                  devicetype, partition='Phones'):
 
+        nameString = firstname + " " + lastname
+        nameDevicePool = 'DP_'+site
         deviceName = self.deviceGetName(username, devicetype)
         tempPhoneConfigName = 'Standard Common Phone Profile'
 
@@ -281,19 +283,25 @@ class cucmAxlWriter:
                 tempPhoneLine1 = self.factory.XPhoneLine()
                 tempPhoneLine1.index = 1
                 tempPhoneLine1.dirn = tempDirN1
+                tempPhoneLine1.label = nameString + " " + extension
+                tempPhoneLine1.display = nameString
+                tempPhoneLine1.displayAscii = nameString
+                tempPhoneLine1.e164Mask = did
+
                 tempPhoneLine1.associatedEndusers = {'enduser': {'userId': username}}
 
                 cawLogger.debug(tempPhoneLine1)
 
                 addphonepackage = self.factory.XPhone()
                 addphonepackage.name = deviceName
+                addphonepackage.description = nameDevicePool + "|" + nameString
                 addphonepackage.product = tempProduct
                 addphonepackage.model = tempModel
                 addphonepackage['class'] = 'Phone'
                 addphonepackage.protocol = 'SIP'
                 addphonepackage.commonPhoneConfigName = tempPhoneConfigName
                 addphonepackage.locationName = 'Hub_None'
-                addphonepackage.devicePoolName = 'DP_'+site
+                addphonepackage.devicePoolName = nameDevicePool
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
                 addphonepackage.callingSearchSpaceName = 'Device - ' + site
