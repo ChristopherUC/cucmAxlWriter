@@ -25,118 +25,126 @@ cjwLogger.debug("Begin JabberWriter Debug Logging")
 
 class cucmJabberWriter:
     # uses cucmAxlWriter to write Jabber devices lines users to CUCM
-    __jabberTypes = ['CSF', 'TCT', 'BOT', 'TAB']
+    _jabberTypes = ['CSF', 'TCT', 'BOT', 'TAB']
 
     # jabberWriter will take all data about user, below
     # data obtained based on given data
-    __obtainedFirstName = ''  # obtained from LDAP user in CUCM
-    __obtainedLastName = ''  # obtained from LDAP user in CUCM
+    _obtainedFirstName = ''  # obtained from LDAP user in CUCM
+    _obtainedLastName = ''  # obtained from LDAP user in CUCM
 
     # data given during inital setup
-    __givensAMAccountName = ''  # sAMAccountName must have a matching user
-    __givenDID = ''  # DID / +e164 number (10 digit number)
-    __givenEpriseExt = ''  # Extension (6 digit number)
-    __givenSite = ''  # Site name (for Device Pool and D_CSS)
-    __givenVM = ''  # Bool
-    __givenVMprofile = ''  # IF T - VM Profile required to set on line
-    __givenCoS = 'INTL'  # Class of Service - default INTLf
-    __givenSNR = ''  # Bool
-    __givenSNRphone = ''  # IF T - Cell Phone Number required
+    _givensAMAccountName = ''  # sAMAccountName must have a matching user
+    _givenDID = ''  # DID / +e164 number (10 digit number)
+    _givenEpriseExt = ''  # Extension (6 digit number)
+    _givenSite = ''  # Site name (for Device Pool and D_CSS)
+    _givenVM = ''  # Bool
+    _givenVMprofile = ''  # IF T - VM Profile required to set on line
+    _givenCoS = 'INTL'  # Class of Service - default INTLf
+    _givenSNR = ''  # Bool
+    _givenSNRphone = ''  # IF T - Cell Phone Number required
     # Meet me config? (maybe)
     myCucmAxlWriter = cucmAxlWriter()
 
-    def __init__(self, sAMAccountName, DID, EpriseExt, Site, VM, VMprofile,
-                 CoS, SNR, SNRphone):
+    def __init__(self, sAMAccountName, DID, EpriseExt, Site, VM='f',
+                 VMprofile='voicemailusertemplate', CoS='International',
+                 SNR='f', SNRphone='', PIN='232323', gFirstName='GetAD!',
+                 gLastName='GetAD!'):
 
-        self.__setsAMAccountName(sAMAccountName)
-        self.__setDID(DID)
-        self.__setEpriseExt(EpriseExt)
-        self.__setSite(Site)
-        self.__setVM(VM)
-        self.__setVMprofile(VMprofile)
-        self.__setCoS(CoS)
-        self.__setSNR(SNR)
-        self.__setSNRphone(SNRphone)
+        self._setsAMAccountName(sAMAccountName)
+        self._setDID(DID)
+        self._setEpriseExt(EpriseExt)
+        self._setSite(Site)
+        self._setVM(VM)
+        self._setVMprofile(VMprofile)
+        self._setCoS(CoS)
+        self._setSNR(SNR)
+        self._setSNRphone(SNRphone)
         user = self.myCucmAxlWriter.userGet(username=self.getsAMAccountName())
         cjwLogger.debug(user)
 
         if not user:
             raise Exception("User does NOT exist in CUCM, unrecoverable")
         cjwLogger.info("init getUser Completed")
-        tempFirstName = user['return']['user']['firstName']
-        tempLastName = user['return']['user']['lastName']
+        if 'GetAD!' in gFirstName:
+            tempFirstName = user['return']['user']['firstName']
+        else:
+            tempFirstName = gFirstName
+        if 'GetAD!' in gLastName:
+            tempLastName = user['return']['user']['lastName']
+        else:
+            tempLastName = gLastName
         cjwLogger.debug('firstname: %s lastname: %s', tempFirstName,
                         tempLastName)
-        self.__setFirstName(tempFirstName)
-        self.__setLastName(tempLastName)
+        self._setFirstName(tempFirstName)
+        self._setLastName(tempLastName)
 
-    def __setsAMAccountName(self, username):
-        self.__usersAMAccountName = username
+    def _setsAMAccountName(self, username):
+        self._usersAMAccountName = username
 
     def getsAMAccountName(self):
-        return self.__usersAMAccountName
+        return self._usersAMAccountName
 
-    def __setDID(self, did):
-        self.__userDID = did
+    def _setDID(self, did):
+        self._userDID = did
 
     def getDID(self):
-        return self.__userDID
+        return self._userDID
 
-    def __setEpriseExt(self, extension):
-        self.__userEpriseExt = extension
+    def _setEpriseExt(self, extension):
+        self._userEpriseExt = extension
 
     def getEpriseExt(self):
-        return self.__userEpriseExt
+        return self._userEpriseExt
 
-    def __setSite(self, site):
-        self.__givenSite = site
+    def _setSite(self, site):
+        self._givenSite = site
 
     def getSite(self):
-        return self.__givenSite
+        return self._givenSite
 
-    def __setVM(self, vm):
-        self.__givenVM = vm
+    def _setVM(self, vm):
+        self._givenVM = vm
 
     def getVM(self):
-        return self.__givenVM
+        return self._givenVM
 
-    def __setVMprofile(self, vmprofile):
-        self.__givenVMprofile = vmprofile
+    def _setVMprofile(self, vmprofile):
+        self._givenVMprofile = vmprofile
 
     def getVMprofile(self):
-        return self.__givenVMprofile
+        return self._givenVMprofile
 
-    def __setCoS(self, cos):
-        self.__givenCoS = cos
+    def _setCoS(self, cos):
+        self._givenCoS = cos
 
     def getCoS(self):
-        return self.__givenCoS
+        return self._givenCoS
 
-    def __setSNR(self, snr):
-        self.__givenSNR = snr
+    def _setSNR(self, snr):
+        self._givenSNR = snr
 
     def getSNR(self):
-        return self.__givenSNR
+        return self._givenSNR
 
-    def __setSNRphone(self, snrphone):
-        self.__givenSNRphone = snrphone
+    def _setSNRphone(self, snrphone):
+        self._givenSNRphone = snrphone
 
     def getSNRphone(self):
-        return self.__givenSNRphone
+        return self._givenSNRphone
 
-    def __setFirstName(self, firstName):
-        self.__obtainedFirstName = firstName
+    def _setFirstName(self, firstName):
+        self._obtainedFirstName = firstName
 
     def getFirstName(self):
-        return self.__obtainedFirstName
+        return self._obtainedFirstName
 
-    def __setLastName(self, lastName):
-        self.__obtainedLastName = lastName
+    def _setLastName(self, lastName):
+        self._obtainedLastName = lastName
 
     def getLastName(self):
-        return self.__obtainedLastName
+        return self._obtainedLastName
 
-    def __deleteJabberLine(self):
+    def _deleteJabberLine(self):
         cjwLogger.info("deleteJabberLine called")
         # verify line exists
         if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
@@ -146,7 +154,7 @@ class cucmJabberWriter:
         else:
             cjwLogger.info("createJabberLine already exists")
 
-    def __createJabberLine(self):
+    def _createJabberLine(self):
         cjwLogger.info("createJabberLine called")
         # verify line NOT exist
         if not self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
@@ -160,7 +168,7 @@ class cucmJabberWriter:
         else:
             cjwLogger.info("createJabberLine already exists")
 
-    def __updateJabberLine(self):
+    def _updateJabberLine(self):
         cjwLogger.info("updateJabberLine called")
         if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
             cjwLogger.info("Line exists, updating")
@@ -169,9 +177,9 @@ class cucmJabberWriter:
             cjwLogger.info("updateJabberLine does NOT exist")
             raise Exception("attempted to update a line that does not exist")
 
-    def __deleteJabberDevices(self):
+    def _deleteJabberDevices(self):
         cjwLogger.info("deleteJabberDevice called")
-        for jabberType in self.__jabberTypes:
+        for jabberType in self._jabberTypes:
             if self.myCucmAxlWriter.deviceExists(jabberType +
                                                  self.getsAMAccountName()):
                 cjwLogger.info("%s Device exists", jabberType)
@@ -179,21 +187,24 @@ class cucmJabberWriter:
                                                   jabberType)
             cjwLogger.info("%s deleteJabberDevice done", jabberType)
 
-    def __createJabberDevices(self):
+    def _createJabberDevices(self):
         cjwLogger.info("createJabberDevices called")
-        for jabberType in self.__jabberTypes:
+        for jabberType in self._jabberTypes:
             if not self.myCucmAxlWriter.deviceExists(jabberType +
                                                      self.getsAMAccountName()):
                 cjwLogger.info("%s Device does NOT exist", jabberType)
                 self.myCucmAxlWriter.deviceAdd(self.getsAMAccountName(),
+                                               self.getFirstName(),
+                                               self.getLastName(),
                                                self.getEpriseExt(),
+                                               self.getDID(),
                                                self.getSite(),
                                                jabberType)
             cjwLogger.info("%s createJabberDevice done", jabberType)
 
-    def __updateJabberUser(self):
+    def _updateJabberUser(self):
         deviceList = []
-        for jabberType in self.__jabberTypes:
+        for jabberType in self._jabberTypes:
             deviceList.insert(0, jabberType+self.getsAMAccountName())
         self.myCucmAxlWriter.userUpdate(self.getsAMAccountName(),
                                         self.getEpriseExt(),
@@ -202,15 +213,15 @@ class cucmJabberWriter:
 
     def writeJabber(self):
         cjwLogger.info("writeJabber called")
-        self.__createJabberLine()
-        self.__updateJabberLine()  # required for adding an e164AltNum
-        self.__createJabberDevices()  # create ALL jabber devices in CUCM
-        self.__updateJabberUser()  # update user to associate devices
+        self._createJabberLine()
+        self._updateJabberLine()  # required for adding an e164AltNum
+        self._createJabberDevices()  # create ALL jabber devices in CUCM
+        self._updateJabberUser()  # update user to associate devices
         # TODO cleanup after itself in failure scenario
         cjwLogger.info("writeJabber completed")
 
     def cleanJabber(self):
         cjwLogger.info("cleanJabber called")
-        self.__deleteJabberDevices()  # delete all devices
-        self.__deleteJabberLine()  # delete line
+        self._deleteJabberDevices()  # delete all devices
+        self._deleteJabberLine()  # delete line
         cjwLogger.info("cleanJabber completed")
