@@ -21,7 +21,7 @@ class ccmAppConfig(appConfig):
     # holds config data for connection to UC Apps
 
     # default /axlsqltoolkit/schema/current/AXLAPI.wsdl
-    _wsdlFileName = 'axlsqltoolkit/schema/10.5/AXLAPI.wsdl'
+    _wsdlFileName = 'axlsqltoolkit/schema/11.0/AXLAPI.wsdl'
 
     def __init__(self, cfgFileName):
         appConfig.__init__(self, cfgFileName)
