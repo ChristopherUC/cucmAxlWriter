@@ -4,6 +4,7 @@ __author__ = 'Christopher Phillips'
 
 # import sys
 import logging
+import json
 from cucmAxlWriter import cucmAxlWriter
 
 cjwLogger = logging.getLogger(__name__)
@@ -150,9 +151,11 @@ class cucmJabberWriter:
         if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
             cjwLogger.info("Line exists")
             self.myCucmAxlWriter.lineDelete(self.getEpriseExt())
+            return "Success"  # Deleted
             cjwLogger.info("deleteJabberLine Completed")
         else:
-            cjwLogger.info("createJabberLine already exists")
+            cjwLogger.info("Line does not exist to delete")
+            return "Fail"  # Did not delete
 
     def _createJabberLine(self):
         cjwLogger.info("createJabberLine called")
@@ -165,8 +168,10 @@ class cucmJabberWriter:
                                          site=self.getSite(),
                                          vm=self.getVM())
             cjwLogger.info("createJabberLine Completed")
+            return "Success"  # Line Created
         else:
             cjwLogger.info("createJabberLine already exists")
+            return "Fail"  # Line already exists
 
     def _updateJabberLine(self):
         cjwLogger.info("updateJabberLine called")
@@ -174,11 +179,13 @@ class cucmJabberWriter:
             cjwLogger.info("Line exists, updating")
             self.myCucmAxlWriter.lineUpdate(extension=self.getEpriseExt(),
                                             did=self.getDID())
+            return "Success"  # Line Updated
         else:
             cjwLogger.info("updateJabberLine does NOT exist")
-            raise Exception("attempted to update a line that does not exist")
+            return "Fail"  # Attempted to update a line that does not exist"
 
     def _deleteJabberDevices(self):
+        status = {}
         cjwLogger.info("deleteJabberDevice called")
         for jabberType in self._jabberTypes:
             if self.myCucmAxlWriter.deviceExists(jabberType +
@@ -186,9 +193,13 @@ class cucmJabberWriter:
                 cjwLogger.info("%s Device exists", jabberType)
                 self.myCucmAxlWriter.deviceDelete(self.getsAMAccountName(),
                                                   jabberType)
+                status.update({"{0}".format(jabberType): "Success"})
+                # status.update({"{0}".format(jabberType): "Fail"})
             cjwLogger.info("%s deleteJabberDevice done", jabberType)
+        return status
 
     def _createJabberDevices(self):
+        status = {}
         cjwLogger.info("createJabberDevices called")
         for jabberType in self._jabberTypes:
             if not self.myCucmAxlWriter.deviceExists(jabberType +
@@ -201,7 +212,11 @@ class cucmJabberWriter:
                                                did=self.getDID(),
                                                site=self.getSite(),
                                                devicetype=jabberType)
-            cjwLogger.info("%s createJabberDevice done", jabberType)
+                status.update({"{0}".format(jabberType): "Success"})
+                cjwLogger.info("%s createJabberDevice done", jabberType)
+            else:
+                status.update({"{0}".format(jabberType): "Fail"})
+        return status
 
     def _updateJabberUser(self):
         deviceList = []
@@ -213,18 +228,29 @@ class cucmJabberWriter:
                                         deviceList=deviceList,
                                         pin="232323")
         cjwLogger.info("updateJabberUser completed")
+        return "Success"  # User Updated"
 
     def writeJabber(self):
+        status = {}
         cjwLogger.info("writeJabber called")
-        self._createJabberLine()
-        self._updateJabberLine()  # required for adding an e164AltNum
-        self._createJabberDevices()  # create ALL jabber devices in CUCM
-        self._updateJabberUser()  # update user to associate devices
+        # create line, needed for all other associations
+        status.update({"lineCreate": self._createJabberLine()})
+        # required for adding an e164AltNum
+        status.update({"lineUpdate": self._updateJabberLine()})
+        # create ALL jabber devices in CUCM
+        status.update({"deviceCreate": self._createJabberDevices()})
+        # update user to associate devices
+        status.update({"endUserUpdate": self._updateJabberUser()})
         # TODO cleanup after itself in failure scenario
         cjwLogger.info("writeJabber completed")
+        return json.dumps(status)
 
     def cleanJabber(self):
+        status = {}
         cjwLogger.info("cleanJabber called")
-        self._deleteJabberDevices()  # delete all devices
-        self._deleteJabberLine()  # delete line
+        # delete all devices
+        status.update({"deviceDelete": self._deleteJabberDevices()})
+        # delete line
+        status.update({"lineDelete": self._deleteJabberLine()})
         cjwLogger.info("cleanJabber completed")
+        return json.dumps(status)
