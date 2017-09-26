@@ -105,7 +105,8 @@ class cucmAxlWriter:
         # current users will be LDAP synced
         return False
 
-    def userUpdate(self, username, extension, deviceList, partition='Phones'):
+    def userUpdate(self, username, extension, did, deviceList, pin,
+                   partition='Phones'):
         userGroups = ['Standard CTI Enabled',
                       'Standard CCM End Users',
                       'Standard CTI Allow Control of Phones supporting '
@@ -114,11 +115,15 @@ class cucmAxlWriter:
                       + 'Rollover Mode']
         result = self.service.updateUser(
                         userid=username,
+                        selfService=did,
                         associatedDevices={'device': deviceList},
                         primaryExtension={'pattern': extension,
                                           'routePartitionName': partition},
                         associatedGroups={'userGroup': userGroups},
-                        imAndPresenceEnable='true')
+                        homeCluster='true',
+                        imAndPresenceEnable='true',
+                        enableUserToHostConferenceNow='true',
+                        attendeesAccessCode='232323')
         cawLogger.info("Update User Completed")
         cawLogger.debug(result)
 
@@ -202,7 +207,7 @@ class cucmAxlWriter:
                                                      'false',
                                                      'advertiseGloballyIls':
                                                      'true'})
-        cawLogger.info("UpdateUser Completed")
+        cawLogger.info("lineUpdate Completed")
         cawLogger.debug(result)
 
     def lineDelete(self, extension, partition='Phones'):
