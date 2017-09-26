@@ -118,9 +118,11 @@ class cupiRestWriter:
         return pkid
 
     def importNewVoicemail(self):
+        status = {}
         cupiRLogger.info("Import Voicemail Started")
 
         pkid = self.getImportUserPkid()
+        status.update({"vmLdapUserFound": "Success"})
         userData = json.dumps({"dtmfAccessId": self._extension, "pkid": pkid})
         vmCreateUrl = 'import/users/ldap'
         url = self.__baseUrl + vmCreateUrl
@@ -136,6 +138,8 @@ class cupiRestWriter:
             # This means something went wrong.
             raise Exception('POST {0} {1}'.format(url,
                                                   resp.status_code))
+        status.update({"vmLdapUserImported": "Success"})
+        return json.dumps(status)
 
     def getTemplate(self):
         getTemplateUrl = 'usertemplates'
@@ -160,13 +164,17 @@ class cupiRestWriter:
                             headers=self.__headers,
                             params=query)
         data = resp.json()
-        return data['User']['ObjectId']
+        try:
+            return data['User']['ObjectId']
+        except KeyError:
+            return("KeyError: User note found VM will NOT be created")
         if resp.status_code != 200:
             # This means something went wrong.
             raise Exception('GET {0} {1}'.format(url,
                                                  resp.status_code))
 
     def deleteVoicemail(self):
+        status = {}
         cupiRLogger.info("Delete Voicemail Started")
         userObjectId = self.getVmObjectId()
         vmDeleteUrl = 'users/' + userObjectId
@@ -179,3 +187,6 @@ class cupiRestWriter:
             # This means something went wrong.
             raise Exception('Delete {0} {1}'.format(url,
                                                     resp.status_code))
+            status.update({"mailboxDeleted": "Fail"})
+        status.update({"mailboxDeleted": "Success"})
+        return json.dumps(status)
