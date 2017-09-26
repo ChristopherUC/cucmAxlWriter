@@ -5,6 +5,7 @@ __author__ = 'Christopher Phillips'
 # import sys
 import logging
 import requests
+import json
 from ucAppConfig import cxnAppConfig
 
 import urllib3  # imported to disable the SAN warning for the cert
@@ -29,61 +30,112 @@ cupiRLogger.debug("Begin CUPI Writer Debug Logging")
 
 class cupiRestWriter:
 
-    headers = {'Content-Type': 'application/xml', 'Accept': 'application/json'}
-    # server accepts XML, we request JSON in response
-    template = 'voicemailusertemplate'
     myCxnConfig = ''
+    __headers = {"Content-Type": "application/json",
+                 "Accept": "application/json"}
     __baseUrl = ''
-    __newUserXml = ''
     __auth = ''
     __verify = ''
+    __template = 'voicemailusertemplate'
+    _newUserData = ''
+    _alias = ''
+    _extension = ''
 
     def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress):
         cupiRLogger.info("Rest Writer Started")
+        self._alias = Alias
+        self._extension = Extension
         self.myCxnConfig = cxnAppConfig('cxn.cfg')
 
-        self.__newUserXml = self.genNewUserXML(FirstName,
-                                               LastName,
-                                               Alias,
-                                               EmailAddress,
-                                               Extension)
-        cupiRLogger.debug(self.__newUserXml)
+        if '!' in FirstName or '!' in LastName:
+            # Get from AD User
+            tempFirstName = "Fake"
+            tempLastName = "User"
+        else:
+            tempFirstName = FirstName
+            tempLastName = LastName
+        self._newUserData = self.getNewUserJSON(tempFirstName,
+                                                tempLastName,
+                                                Alias,
+                                                EmailAddress,
+                                                Extension)
+        cupiRLogger.debug(self._newUserData)
         self.__baseUrl = self.myCxnConfig.getAppApiUrl()
         self.__auth = (self.myCxnConfig.getAppUsername(),
                        self.myCxnConfig.getAppPassword())
         self.__verify = self.myCxnConfig.getAppCert()
 
-    def genNewUserXML(self, FirstName, LastName, Alias, EmailAddress,
-                      DtmfAccessId):
+    def getNewUserJSON(self, FirstName, LastName, Alias, EmailAddress,
+                       DtmfAccessId):
         DisplayName = FirstName + " " + LastName
         SmtpAddress = Alias + "@" + self.myCxnConfig.getAppHost()
-
-        newUserXml = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-        <User>
-            <FirstName>{0}</FirstName>
-            <LastName>{1}</LastName>
-            <Alias>{2}</Alias>
-            <DisplayName>{3}</DisplayName>
-            <EmailAddress>{4}</EmailAddress>
-            <SmtpAddress>{5}</SmtpAddress>
-            <DtmfAccessId>{6}</DtmfAccessId>
-        </User>'''.format(FirstName, LastName, Alias, DisplayName,
-                          EmailAddress, SmtpAddress, DtmfAccessId)
-        return newUserXml
+        return json.dumps({"FirstName": FirstName,
+                           "LastName": LastName,
+                           "Alias": Alias,
+                           "DisplayName": DisplayName,
+                           "EmailAddress": EmailAddress,
+                           "SmtpAddress": SmtpAddress,
+                           "DtmfAccessId": DtmfAccessId
+                           })
 
     def createNewVoicemail(self):
         cupiRLogger.info("Create Voicemail Started")
-        vmCreateUrl = 'users?templateAlias=' + self.template
+        vmCreateUrl = 'users'
         url = self.__baseUrl + vmCreateUrl
+        querystring = {"templateAlias": self.__template}
+
         resp = requests.post(url,
                              auth=self.__auth,
                              verify=self.__verify,
-                             data=self.__newUserXml,
-                             headers=self.headers)
+                             headers=self.__headers,
+                             data=self._newUserData,
+                             params=querystring)
         if resp.status_code != 201:
             # This means something went wrong.
-            raise Exception('POST /{0} {1}'.format(url,
-                                                   resp.status_code))
+            raise Exception('POST {0} {1}'.format(url,
+                                                  resp.status_code))
+
+    def getImportUserPkid(self):
+        cupiRLogger.debug("Get Import PKID")
+        vmImportUrl = 'import/users/ldap'
+        url = self.__baseUrl + vmImportUrl
+        query = {"limit": "1", "query": "(alias is {0})".format(self._alias)}
+
+        resp = requests.get(url,
+                            auth=self.__auth,
+                            verify=self.__verify,
+                            headers=self.__headers,
+                            params=query)
+        if resp.status_code != 200:
+            # This means something went wrong.
+            raise Exception('GET {0} {1}'.format(url,
+                                                 resp.status_code))
+        data = resp.json()
+        try:
+            pkid = data['ImportUser']['pkid']
+        except KeyError:
+            return("KeyError: VM will NOT be created")
+        return pkid
+
+    def importNewVoicemail(self):
+        cupiRLogger.info("Import Voicemail Started")
+
+        pkid = self.getImportUserPkid()
+        userData = json.dumps({"dtmfAccessId": self._extension, "pkid": pkid})
+        vmCreateUrl = 'import/users/ldap'
+        url = self.__baseUrl + vmCreateUrl
+        query = {"templateAlias": self.__template}
+
+        resp = requests.post(url,
+                             auth=self.__auth,
+                             verify=self.__verify,
+                             headers=self.__headers,
+                             data=userData,
+                             params=query)
+        if resp.status_code != 201:
+            # This means something went wrong.
+            raise Exception('POST {0} {1}'.format(url,
+                                                  resp.status_code))
 
     def getTemplate(self):
         getTemplateUrl = 'usertemplates'
@@ -91,39 +143,39 @@ class cupiRestWriter:
         resp = requests.post(url,
                              auth=self.__auth,
                              verify=self.__verify,
-                             headers=self.headers)
+                             headers=self.__headers)
         if resp.status_code != 201:
             # This means something went wrong.
-            raise Exception('POST /{0} {1}'.format(getTemplateUrl,
+            raise Exception('POST {0} {1}'.format(url,
                             resp.status_code))
 
-    def getVmObjectId(self, alias):
-        # accept = 'Accept: application/json'
-        vmGetUrl = 'users?query=(alias is {0})'.format(alias)
+    def getVmObjectId(self):
+        vmGetUrl = 'users'
         url = self.__baseUrl + vmGetUrl
+        query = {"query": "(alias is {0})".format(self._alias)}
+
         resp = requests.get(url,
                             auth=self.__auth,
                             verify=self.__verify,
-                            headers=self.headers,
-                            # accept=accept
-                            )
+                            headers=self.__headers,
+                            params=query)
         data = resp.json()
         return data['User']['ObjectId']
         if resp.status_code != 200:
             # This means something went wrong.
-            raise Exception('GET /{0} {1}'.format(vmGetUrl,
-                                                  resp.status_code))
+            raise Exception('GET {0} {1}'.format(url,
+                                                 resp.status_code))
 
-    def deleteVoicemail(self, alias):
+    def deleteVoicemail(self):
         cupiRLogger.info("Delete Voicemail Started")
-        userObjectId = self.getVmObjectId(alias)
+        userObjectId = self.getVmObjectId()
         vmDeleteUrl = 'users/' + userObjectId
         url = self.__baseUrl + vmDeleteUrl
         resp = requests.delete(url,
                                auth=self.__auth,
                                verify=self.__verify,
-                               headers=self.headers)
+                               headers=self.__headers)
         if resp.status_code != 204:
             # This means something went wrong.
-            raise Exception('Delete /{0} {1}'.format(vmDeleteUrl,
-                                                     resp.status_code))
+            raise Exception('Delete {0} {1}'.format(url,
+                                                    resp.status_code))
