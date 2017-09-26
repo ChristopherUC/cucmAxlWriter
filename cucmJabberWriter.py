@@ -159,10 +159,10 @@ class cucmJabberWriter:
         # verify line NOT exist
         if not self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
             cjwLogger.info("Line does NOT exist")
-            self.myCucmAxlWriter.lineAdd(self.getEpriseExt(),
-                                         self.getFirstName(),
-                                         self.getLastName(),
-                                         self.getSite(),
+            self.myCucmAxlWriter.lineAdd(extension=self.getEpriseExt(),
+                                         firstname=self.getFirstName(),
+                                         lastname=self.getLastName(),
+                                         site=self.getSite(),
                                          vm=self.getVM())
             cjwLogger.info("createJabberLine Completed")
         else:
@@ -172,7 +172,8 @@ class cucmJabberWriter:
         cjwLogger.info("updateJabberLine called")
         if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
             cjwLogger.info("Line exists, updating")
-            self.myCucmAxlWriter.lineUpdate(self.getEpriseExt(), self.getDID())
+            self.myCucmAxlWriter.lineUpdate(extension=self.getEpriseExt(),
+                                            did=self.getDID())
         else:
             cjwLogger.info("updateJabberLine does NOT exist")
             raise Exception("attempted to update a line that does not exist")
@@ -194,21 +195,23 @@ class cucmJabberWriter:
                                                      self.getsAMAccountName()):
                 cjwLogger.info("%s Device does NOT exist", jabberType)
                 self.myCucmAxlWriter.deviceAdd(self.getsAMAccountName(),
-                                               self.getFirstName(),
-                                               self.getLastName(),
-                                               self.getEpriseExt(),
-                                               self.getDID(),
-                                               self.getSite(),
-                                               jabberType)
+                                               firstname=self.getFirstName(),
+                                               lastname=self.getLastName(),
+                                               extension=self.getEpriseExt(),
+                                               did=self.getDID(),
+                                               site=self.getSite(),
+                                               devicetype=jabberType)
             cjwLogger.info("%s createJabberDevice done", jabberType)
 
     def _updateJabberUser(self):
         deviceList = []
         for jabberType in self._jabberTypes:
             deviceList.insert(0, jabberType+self.getsAMAccountName())
-        self.myCucmAxlWriter.userUpdate(self.getsAMAccountName(),
-                                        self.getEpriseExt(),
-                                        deviceList)
+        self.myCucmAxlWriter.userUpdate(username=self.getsAMAccountName(),
+                                        extension=self.getEpriseExt(),
+                                        did=self.getDID(),
+                                        deviceList=deviceList,
+                                        pin="232323")
         cjwLogger.info("updateJabberUser completed")
 
     def writeJabber(self):
