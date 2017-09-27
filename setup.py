@@ -6,5 +6,6 @@ setup(name='cucmAxlWriter',
       author_email='christopherphillips+cucmAxlWriter@gmail.com',
       url='https://github.com/ChristopherUC/cucmAxlWriter',
       license='GNU GENERAL PUBLIC LICENSE Version 3',
-      py_modules=['cucmAxlWriter', 'cucmJabberWriter', 'cucmAxlConfig'],
+      py_modules=['appConfig', 'ucAppConfig', 'configCreator', 'cucmAxlWriter',
+                  'cucmJabberWriter', 'cupiRestWriter'],
       )
