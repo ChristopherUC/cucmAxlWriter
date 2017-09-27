@@ -293,7 +293,8 @@ class cucmAxlWriter:
                 tempPhoneLine1.displayAscii = nameString
                 tempPhoneLine1.e164Mask = did
 
-                tempPhoneLine1.associatedEndusers = {'enduser': {'userId': username}}
+                tempPhoneLine1.associatedEndusers = {'enduser':
+                                                     {'userId': username}}
 
                 cawLogger.debug(tempPhoneLine1)
 
