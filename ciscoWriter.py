@@ -59,12 +59,6 @@ parser.add_option("-m", "--snrdid", action="store", type="string",
 #                                  VM, VMprofile, CoS, SNR, SNRphone)
 # myJabber = cucmJabberWriter('fernando', '5097148870', '118870',
 #                             'Seattle', 'True', 'NA', 'INTL', 'False', 'NA')
-''' ./ciscoWriter.py -a create -u patrick -f Christopher -l Phillips -e 223611
- -d 2065551234 -s Tampa -g 54321 -v True -b patrick@fakedomain.com
- -p voicemailusertemplate -c International -r False -m 4255551212'''
-'''./ciscoWriter.py -a create -u patrick -f GetAD! -l GetAD! -e 223611
- -d 2065551234 -s Tampa -g 54321 -v True -b patrick@fakedomain.com
-  -p voicemailusertemplate -c International -r False -m 4255551212'''
 '''./ciscoWriter.py -a create -u tdurden -e 223611 -d 2065551234 -s Tampa
  -g 54321 -v True -b tdurden@apitest.org -p voicemailusertemplate
   -c International -r False -m 4255551212'''
