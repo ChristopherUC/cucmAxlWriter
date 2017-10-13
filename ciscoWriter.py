@@ -39,7 +39,7 @@ parser.add_option("-d", "--did", action="store", type="string",
                   dest="did", help="DID of jabber user")
 parser.add_option("-s", "--site", action="store", type="string",
                   dest="city", help="Site of jabber user")
-parser.add_option("-h", "--subsite", action="store", type="string",
+parser.add_option("-i", "--subsite", action="store", type="string",
                   dest="building", help="Site of jabber user")
 parser.add_option("-g", "--pin", action="store", type="string",
                   dest="pin", help="User PIN for VM and MeetMe")
