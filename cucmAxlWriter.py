@@ -154,11 +154,11 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def lineAdd(self, extension, firstname, lastname, site, vm='False',
-                partition='Internal PAR', usage='Device'):
+    def lineAdd(self, extension, firstname, lastname, building, city,
+                vm='False', partition='Internal PAR', usage='Device'):
         if not self.lineExists(extension):
             try:
-                devCss = site+' International CSS'
+                devCss = city+' International CSS'
                 # lineCss = 'Class - International'
                 vmConfig = {
                     'forwardToVoiceMail': vm,
@@ -254,11 +254,11 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def deviceAdd(self, username, firstname, lastname, extension, did, site,
-                  devicetype, partition='Internal PAR'):
+    def deviceAdd(self, username, firstname, lastname, extension, did,
+                  building, city, devicetype, partition='Internal PAR'):
 
         nameString = firstname + " " + lastname
-        nameDevicePool = site+' DP'
+        nameDevicePool = building+' DP'
         deviceName = self.deviceGetName(username, devicetype)
         tempPhoneConfigName = 'Standard Common Phone Profile'
 
@@ -314,7 +314,7 @@ class cucmAxlWriter:
                 addphonepackage.devicePoolName = nameDevicePool
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
-                addphonepackage.callingSearchSpaceName = site+' International CSS'
+                addphonepackage.callingSearchSpaceName = city+' International CSS'
                 cawLogger.debug(addphonepackage)
 
                 createdPhone = self.service.addPhone(addphonepackage)

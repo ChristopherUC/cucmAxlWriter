@@ -37,7 +37,8 @@ class cucmJabberWriter:
     _givensAMAccountName = ''  # sAMAccountName must have a matching user
     _givenDID = ''  # DID / +e164 number (10 digit number)
     _givenEpriseExt = ''  # Extension (6 digit number)
-    _givenSite = ''  # Site name (for Device Pool and D_CSS)
+    _givenCity = ''  # City name (for D_CSS)
+    _givenBuilding = ''  # Building name (for Device Pool)
     _givenVM = ''  # Bool
     _givenVMprofile = ''  # IF T - VM Profile required to set on line
     _givenCoS = 'INTL'  # Class of Service - default INTLf
@@ -46,7 +47,7 @@ class cucmJabberWriter:
     # Meet me config? (maybe)
     myCucmAxlWriter = cucmAxlWriter()
 
-    def __init__(self, sAMAccountName, DID, EpriseExt, Site, VM='f',
+    def __init__(self, sAMAccountName, DID, EpriseExt, Building, City, VM='f',
                  VMprofile='voicemailusertemplate', CoS='International',
                  SNR='f', SNRphone='', PIN='232323', gFirstName='GetAD!',
                  gLastName='GetAD!'):
@@ -54,7 +55,8 @@ class cucmJabberWriter:
         self._setsAMAccountName(sAMAccountName)
         self._setDID(DID)
         self._setEpriseExt(EpriseExt)
-        self._setSite(Site)
+        self._setBuilding(Building)
+        self._setCity(City)
         self._setVM(VM)
         self._setVMprofile(VMprofile)
         self._setCoS(CoS)
@@ -97,11 +99,17 @@ class cucmJabberWriter:
     def getEpriseExt(self):
         return self._userEpriseExt
 
-    def _setSite(self, site):
-        self._givenSite = site
+    def _setBuilding(self, building):
+        self._givenBuilding = building
 
-    def getSite(self):
-        return self._givenSite
+    def getBuilding(self):
+        return self._givenBuilding
+
+    def _setCity(self, city):
+        self._givenCity = city
+
+    def getCity(self):
+        return self._givenCity
 
     def _setVM(self, vm):
         self._givenVM = vm
@@ -165,7 +173,8 @@ class cucmJabberWriter:
             self.myCucmAxlWriter.lineAdd(extension=self.getEpriseExt(),
                                          firstname=self.getFirstName(),
                                          lastname=self.getLastName(),
-                                         site=self.getSite(),
+                                         building=self.getBuilding(),
+                                         city=self.getCity(),
                                          vm=self.getVM())
             cjwLogger.info("createJabberLine Completed")
             return "Success"  # Line Created
@@ -210,7 +219,8 @@ class cucmJabberWriter:
                                                lastname=self.getLastName(),
                                                extension=self.getEpriseExt(),
                                                did=self.getDID(),
-                                               site=self.getSite(),
+                                               building=self.getBuilding(),
+                                               city=self.getCity(),
                                                devicetype=jabberType)
                 status.update({"{0}".format(jabberType): "Success"})
                 cjwLogger.info("%s createJabberDevice done", jabberType)

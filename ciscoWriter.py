@@ -38,7 +38,9 @@ parser.add_option("-e", "--ext", action="store", type="string",
 parser.add_option("-d", "--did", action="store", type="string",
                   dest="did", help="DID of jabber user")
 parser.add_option("-s", "--site", action="store", type="string",
-                  dest="site", help="Site of jabber user")
+                  dest="city", help="Site of jabber user")
+parser.add_option("-h", "--subsite", action="store", type="string",
+                  dest="building", help="Site of jabber user")
 parser.add_option("-g", "--pin", action="store", type="string",
                   dest="pin", help="User PIN for VM and MeetMe")
 parser.add_option("-v", "--voicemail", action="store", type="string",
@@ -60,7 +62,7 @@ parser.add_option("-m", "--snrdid", action="store", type="string",
 # myJabber = cucmJabberWriter('fernando', '5097148870', '118870',
 #                             'Seattle', 'True', 'NA', 'INTL', 'False', 'NA')
 '''./ciscoWriter.py -a create -u tdurden -e 223611 -d 2065551234 -s Tampa
- -g 54321 -v True -b tdurden@apitest.org -p voicemailusertemplate
+ -h Northwoods -g 54321 -v True -b tdurden@apitest.org -p voicemailusertemplate
   -c International -r False -m 4255551212'''
 
 if not options.firstname:
@@ -68,10 +70,16 @@ if not options.firstname:
 if not options.lastname:
     options.lastname = 'GetAD!'
 
+'''
+Device Pools will have following naming convention:	"<Building Name> <Floor> DP"	e.g.  "Uptempo 1W DP"
+Line Calling Search Space	"<City> <CoS> CSS"	e.g.  "Beaverton International CSS"
+'''
+
 myJabber = cucmJabberWriter(sAMAccountName=options.username,
                             DID=options.did,
                             EpriseExt=options.extension,
-                            Site=options.site,
+                            Building=options.building,
+                            City=options.city,
                             VM=options.vm,
                             VMprofile=options.vmprofile,
                             CoS=options.cos,
