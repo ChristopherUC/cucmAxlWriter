@@ -57,10 +57,6 @@ parser.add_option("-m", "--snrdid", action="store", type="string",
                   dest="snrphone", help="Mobile Phone of jabber SNR user")
 (options, args) = parser.parse_args()
 
-# myCiscoWriter = cucmJabberWriter(sAMAccountName, DID, EpriseExt, Site,
-#                                  VM, VMprofile, CoS, SNR, SNRphone)
-# myJabber = cucmJabberWriter('fernando', '5097148870', '118870',
-#                             'Seattle', 'True', 'NA', 'INTL', 'False', 'NA')
 '''./ciscoWriter.py -a create -u tdurden -e 223611 -d 2065551234 -s Tampa
  -i Northwoods -g 54321 -v True -b tdurden@apitest.org -p voicemailusertemplate
   -c International -r False -m 4255551212'''
@@ -71,8 +67,10 @@ if not options.lastname:
     options.lastname = 'GetAD!'
 
 '''
-Device Pools will have following naming convention:	"<Building Name> <Floor> DP"	e.g.  "Uptempo 1W DP"
-Line Calling Search Space	"<City> <CoS> CSS"	e.g.  "Beaverton International CSS"
+Device Pools will have following naming convention:
+"<Building Name> <Floor> DP"	e.g.  "Uptempo 1W DP"
+Line Calling Search Space
+"<City> <CoS> CSS"	e.g.  "Beaverton International CSS"
 '''
 
 myJabber = cucmJabberWriter(sAMAccountName=options.username,
