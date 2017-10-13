@@ -4,6 +4,8 @@ __author__ = 'Christopher Phillips'
 
 # import sys
 import logging
+import tempfile
+import os.path
 from ucAppConfig import ccmAppConfig
 from zeep import Client
 from zeep.cache import SqliteCache
@@ -45,7 +47,8 @@ class cucmAxlWriter:
         zeeplogger.addHandler(zeephandler)
         zeeplogger.info("Begin zeep Logging")
 
-        cache = SqliteCache(path='/tmp/wsdlsqlite.db', timeout=60)
+        tempzeep = os.path.join(tempfile.gettempdir(), 'wsdlsqlite.db')
+        cache = SqliteCache(path=tempzeep, timeout=60)
         transport = Transport(cache=cache)
         client = Client(myCucmConfig.getwsdlFileName(), transport=transport)
 
@@ -106,7 +109,7 @@ class cucmAxlWriter:
         return False
 
     def userUpdate(self, username, extension, did, deviceList, pin,
-                   partition='Phones'):
+                   partition='Internal PAR'):
         userGroups = ['Standard CTI Enabled',
                       'Standard CCM End Users',
                       'Standard CTI Allow Control of Phones supporting '
@@ -130,7 +133,7 @@ class cucmAxlWriter:
     def userDelete(self, username):
         return True
 
-    def lineGet(self, extension, partition='Phones'):
+    def lineGet(self, extension, partition='Internal PAR'):
         try:
             getLine = self.service.getLine(pattern=extension,
                                            routePartitionName=partition)
@@ -140,7 +143,7 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def lineExists(self, extension, partition='Phones'):
+    def lineExists(self, extension, partition='Internal PAR'):
         cawLogger.debug("lineExists Called")
         try:
             getLine = self.service.getLine(pattern=extension,
@@ -152,11 +155,11 @@ class cucmAxlWriter:
             return False
 
     def lineAdd(self, extension, firstname, lastname, site, vm='False',
-                partition='Phones', usage='Device'):
+                partition='Internal PAR', usage='Device'):
         if not self.lineExists(extension):
             try:
-                devCss = 'Device - '+site
-                lineCss = 'Class - International'
+                devCss = site+' International CSS'
+                # lineCss = 'Class - International'
                 vmConfig = {
                     'forwardToVoiceMail': vm,
                     'callingSearchSpaceName': devCss}
@@ -166,11 +169,12 @@ class cucmAxlWriter:
                 addlinepackage.pattern = extension
                 addlinepackage.usage = usage
                 addlinepackage.routePartitionName = partition
-                addlinepackage.shareLineAppearanceCssName = lineCss
+                # addlinepackage.shareLineAppearanceCssName = lineCss
                 addlinepackage.callForwardAll = {
                     'forwardToVoiceMail': 'False',
-                    'callingSearchSpaceName': devCss,
-                    'secondaryCallingSearchSpaceName': lineCss}
+                    'callingSearchSpaceName': devCss
+                    # 'secondaryCallingSearchSpaceName': lineCss
+                    }
                 addlinepackage.callForwardBusy = vmConfig
                 addlinepackage.callForwardBusyInt = vmConfig
                 addlinepackage.callForwardNoAnswer = vmConfig
@@ -210,7 +214,7 @@ class cucmAxlWriter:
         cawLogger.info("lineUpdate Completed")
         cawLogger.debug(result)
 
-    def lineDelete(self, extension, partition='Phones'):
+    def lineDelete(self, extension, partition='Internal PAR'):
         try:
             result = self.service.removeLine(pattern=extension,
                                              routePartitionName=partition)
@@ -251,10 +255,10 @@ class cucmAxlWriter:
             return False
 
     def deviceAdd(self, username, firstname, lastname, extension, did, site,
-                  devicetype, partition='Phones'):
+                  devicetype, partition='Internal PAR'):
 
         nameString = firstname + " " + lastname
-        nameDevicePool = 'DP_'+site
+        nameDevicePool = site+' DP'
         deviceName = self.deviceGetName(username, devicetype)
         tempPhoneConfigName = 'Standard Common Phone Profile'
 
@@ -310,7 +314,7 @@ class cucmAxlWriter:
                 addphonepackage.devicePoolName = nameDevicePool
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
-                addphonepackage.callingSearchSpaceName = 'Device - ' + site
+                addphonepackage.callingSearchSpaceName = site+' International CSS'
                 cawLogger.debug(addphonepackage)
 
                 createdPhone = self.service.addPhone(addphonepackage)
