@@ -4,6 +4,7 @@ __author__ = 'Christopher Phillips'
 
 import sys
 import logging
+import json
 from optparse import OptionParser
 from cucmJabberWriter import cucmJabberWriter
 from cupiRestWriter import cupiRestWriter
@@ -98,11 +99,11 @@ if options.perform == 'create':
     status.update({"ccm": myJabber.writeJabber()})
     # myVoicemail.createNewVoicemail()  # would use for non LDAP use case
     status.update({"cxn": myVoicemail.importNewVoicemail()})
-    print(status)
+    print(json.dumps(status))
 elif options.perform == 'delete':
     status.update({"ccm": myJabber.cleanJabber()})
     status.update({"cxn": myVoicemail.deleteVoicemail()})
-    print(status)
+    print(json.dumps(status))
 else:
     print("Invalid / No Option selected")
 cwLogger.info("CiscoWriter Completed")
