@@ -96,13 +96,13 @@ myVoicemail = cupiRestWriter(Alias=options.username,
 
 status = {}
 if options.perform == 'create':
-    status.update({"ccm": myJabber.writeJabber()})
+    status.update({"ccm": json.dumps(myJabber.writeJabber())})
     # myVoicemail.createNewVoicemail()  # would use for non LDAP use case
-    status.update({"cxn": myVoicemail.importNewVoicemail()})
+    status.update({"cxn": json.dumps(myVoicemail.importNewVoicemail())})
     print(json.dumps(status))
 elif options.perform == 'delete':
-    status.update({"ccm": myJabber.cleanJabber()})
-    status.update({"cxn": myVoicemail.deleteVoicemail()})
+    status.update({"ccm": json.dumps(myJabber.cleanJabber())})
+    status.update({"cxn": json.dumps(myVoicemail.deleteVoicemail())})
     print(json.dumps(status))
 else:
     print("Invalid / No Option selected")
