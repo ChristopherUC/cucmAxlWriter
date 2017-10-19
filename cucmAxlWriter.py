@@ -306,7 +306,7 @@ class cucmAxlWriter:
 
                 addphonepackage = self.factory.XPhone()
                 addphonepackage.name = deviceName
-                addphonepackage.description = nameDevicePool + "|" + nameString
+                addphonepackage.description = nameString + " x" + extension
                 addphonepackage.product = tempProduct
                 addphonepackage.model = tempModel
                 addphonepackage['class'] = 'Phone'
