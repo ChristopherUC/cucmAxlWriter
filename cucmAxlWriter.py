@@ -161,10 +161,11 @@ class cucmAxlWriter:
         if not self.lineExists(extension):
             try:
                 devCss = city+' International CSS'
+                fwdCss = city+' Long Distance CSS'
                 # lineCss = 'Class - International'
                 vmConfig = {
                     'forwardToVoiceMail': vm,
-                    'callingSearchSpaceName': devCss}
+                    'callingSearchSpaceName': fwdCss}
                 nameString = firstname + " " + lastname
 
                 addlinepackage = self.factory.XLine()
@@ -174,7 +175,7 @@ class cucmAxlWriter:
                 # addlinepackage.shareLineAppearanceCssName = lineCss
                 addlinepackage.callForwardAll = {
                     'forwardToVoiceMail': 'False',
-                    'callingSearchSpaceName': devCss
+                    'callingSearchSpaceName': fwdCss
                     # 'secondaryCallingSearchSpaceName': lineCss
                     }
                 addlinepackage.callForwardBusy = vmConfig
@@ -256,7 +257,7 @@ class cucmAxlWriter:
         except Exception as e:
             return False
 
-    def deviceAdd(self, username, firstname, lastname, extension, did,
+    def deviceAdd(self, username, firstname, lastname, e164ext, extension, did,
                   building, city, devicetype, partition='Internal PAR'):
 
         nameString = firstname + " " + lastname
@@ -286,7 +287,7 @@ class cucmAxlWriter:
                 # directory number / line, required for a PhoneLine
                 # line must allready exist
                 tempDirN1 = self.factory.XDirn()
-                tempDirN1.pattern = extension
+                tempDirN1.pattern = e164ext
                 tempDirN1.routePartitionName = partition
                 cawLogger.debug(tempDirN1)
 

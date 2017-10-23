@@ -99,6 +99,9 @@ class cucmJabberWriter:
     def getEpriseExt(self):
         return self._userEpriseExt
 
+    def getE164Ext(self):
+        return "\+1" + self._userDID
+
     def _setBuilding(self, building):
         self._givenBuilding = building
 
@@ -156,9 +159,9 @@ class cucmJabberWriter:
     def _deleteJabberLine(self):
         cjwLogger.info("deleteJabberLine called")
         # verify line exists
-        if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
+        if self.myCucmAxlWriter.lineExists(self.getE164Ext()):
             cjwLogger.info("Line exists")
-            self.myCucmAxlWriter.lineDelete(self.getEpriseExt())
+            self.myCucmAxlWriter.lineDelete(self.getE164Ext())
             return "Success"  # Deleted
             cjwLogger.info("deleteJabberLine Completed")
         else:
@@ -168,9 +171,9 @@ class cucmJabberWriter:
     def _createJabberLine(self):
         cjwLogger.info("createJabberLine called")
         # verify line NOT exist
-        if not self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
+        if not self.myCucmAxlWriter.lineExists(self.getE164Ext()):
             cjwLogger.info("Line does NOT exist")
-            self.myCucmAxlWriter.lineAdd(extension=self.getEpriseExt(),
+            self.myCucmAxlWriter.lineAdd(extension=self.getE164Ext(),
                                          firstname=self.getFirstName(),
                                          lastname=self.getLastName(),
                                          building=self.getBuilding(),
@@ -184,9 +187,9 @@ class cucmJabberWriter:
 
     def _updateJabberLine(self):
         cjwLogger.info("updateJabberLine called")
-        if self.myCucmAxlWriter.lineExists(self.getEpriseExt()):
+        if self.myCucmAxlWriter.lineExists(self.getE164Ext()):
             cjwLogger.info("Line exists, updating")
-            self.myCucmAxlWriter.lineUpdate(extension=self.getEpriseExt(),
+            self.myCucmAxlWriter.lineUpdate(extension=self.getE164Ext(),
                                             did=self.getDID())
             return "Success"  # Line Updated
         else:
@@ -218,6 +221,7 @@ class cucmJabberWriter:
                                                firstname=self.getFirstName(),
                                                lastname=self.getLastName(),
                                                extension=self.getEpriseExt(),
+                                               e164ext=self.getE164Ext(),
                                                did=self.getDID(),
                                                building=self.getBuilding(),
                                                city=self.getCity(),
@@ -233,7 +237,7 @@ class cucmJabberWriter:
         for jabberType in self._jabberTypes:
             deviceList.insert(0, jabberType+self.getsAMAccountName())
         self.myCucmAxlWriter.userUpdate(username=self.getsAMAccountName(),
-                                        extension=self.getEpriseExt(),
+                                        extension=self.getE164Ext(),
                                         did=self.getDID(),
                                         deviceList=deviceList,
                                         pin="232323")

@@ -89,7 +89,7 @@ myJabber = cucmJabberWriter(sAMAccountName=options.username,
                             gLastName=options.lastname)
 
 myVoicemail = cupiRestWriter(Alias=options.username,
-                             Extension=options.extension,
+                             Extension="+1" + options.did,
                              FirstName=options.firstname,
                              LastName=options.lastname,
                              EmailAddress=options.emailaddress)
