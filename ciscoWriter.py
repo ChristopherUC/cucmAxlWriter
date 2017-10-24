@@ -98,12 +98,16 @@ status = {}
 if options.perform == 'create':
     status.update({"ccm": myJabber.writeJabber()})
     # myVoicemail.createNewVoicemail()  # would use for non LDAP use case
-    status.update({"cxn": myVoicemail.importNewVoicemail()})
+    print(options.vm)
+    if options.vm.lower() in ['true', '1', 't', 'y', 'yes']:
+        status.update({"cxn": myVoicemail.importNewVoicemail()})
     print(json.dumps(status))
 elif options.perform == 'delete':
     status.update({"ccm": myJabber.cleanJabber()})
     status.update({"cxn": myVoicemail.deleteVoicemail()})
     print(json.dumps(status))
+elif options.perform == 'rdp':
+    myJabber.rdpTest()
 else:
     print("Invalid / No Option selected")
 cwLogger.info("CiscoWriter Completed")
