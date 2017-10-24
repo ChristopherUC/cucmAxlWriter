@@ -244,6 +244,25 @@ class cucmJabberWriter:
         cjwLogger.info("updateJabberUser completed")
         return "Success"  # User Updated"
 
+    def _createRdpDevice(self):
+        cjwLogger.info("createRdpDevice called")
+        result = self.myCucmAxlWriter.rdpAdd(self.getsAMAccountName(),
+                                             firstname=self.getFirstName(),
+                                             lastname=self.getLastName(),
+                                             e164ext=self.getE164Ext(),
+                                             did=self.getDID(),
+                                             extension=self.getEpriseExt(),
+                                             building=self.getBuilding(),
+                                             city=self.getCity())
+        cjwLogger.debug(result)
+        return "Success"
+
+    def _deleteRdpDevice(self):
+        cjwLogger.info("deleteRdpDevice called")
+        result = self.myCucmAxlWriter.rdpDelete(name=self.getsAMAccountName())
+        cjwLogger.debug(result)
+        return "Success"
+
     def writeJabber(self):
         status = {}
         cjwLogger.info("writeJabber called")
@@ -255,7 +274,8 @@ class cucmJabberWriter:
         status.update({"deviceCreate": self._createJabberDevices()})
         # update user to associate devices
         status.update({"endUserUpdate": self._updateJabberUser()})
-        # TODO cleanup after itself in failure scenario
+        # add Remote Destination Profile
+        status.update({"rdpCreate": self._createRdpDevice()})
         cjwLogger.info("writeJabber completed")
         return json.dumps(status)
 
@@ -264,6 +284,8 @@ class cucmJabberWriter:
         cjwLogger.info("cleanJabber called")
         # delete all devices
         status.update({"deviceDelete": self._deleteJabberDevices()})
+        # delete RDP
+        status.update({"rdpDelete": self._deleteRdpDevice()})
         # delete line
         status.update({"lineDelete": self._deleteJabberLine()})
         cjwLogger.info("cleanJabber completed")
