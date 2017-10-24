@@ -78,15 +78,6 @@ class cucmAxlWriter:
             myCucmConfig.getAppApiUrl())
         cawLogger.info("Service Created")
 
-    # TODO LDAP
-        # check LDAP sync time (can this be checked?)
-        # GetLdapDirectoryReq ?
-        # getLdapSyncCustomField ?
-        # getLdapSyncCustomFieldResponse ?
-        # GetLdapSyncStatusReq !
-        # TODO   kick off LDAP Sync (maybe just do this always)
-        # TODO   Check LDAP sync time again?
-
     def userGet(self, username):
         try:
             obtainedUser = self.service.getUser(userid=username)
@@ -106,7 +97,6 @@ class cucmAxlWriter:
             return False
 
     def userAdd(self, username):
-        # TODO : build for future if needed
         # current users will be LDAP synced
         return False
 
@@ -128,7 +118,8 @@ class cucmAxlWriter:
                         homeCluster='true',
                         imAndPresenceEnable='true',
                         enableUserToHostConferenceNow='true',
-                        attendeesAccessCode='232323')
+                        attendeesAccessCode='232323',
+                        enableMobility='true')
         cawLogger.info("Update User Completed")
         cawLogger.debug(result)
 
@@ -160,7 +151,7 @@ class cucmAxlWriter:
                 vm='False', partition='Internal PAR', usage='Device'):
         if not self.lineExists(extension):
             try:
-                devCss = city+' International CSS'
+                # devCss = city+' International CSS'
                 fwdCss = city+' Long Distance CSS'
                 # lineCss = 'Class - International'
                 vmConfig = {
@@ -264,6 +255,7 @@ class cucmAxlWriter:
         nameDevicePool = building+' DP'
         deviceName = self.deviceGetName(username, devicetype)
         tempPhoneConfigName = 'Standard Common Phone Profile'
+        devCss = city+' International CSS'
 
         if devicetype == 'CSF':
             tempProduct = 'Cisco Unified Client Services Framework'
@@ -317,7 +309,8 @@ class cucmAxlWriter:
                 addphonepackage.devicePoolName = nameDevicePool
                 addphonepackage.lines = {'line': tempPhoneLine1}
                 addphonepackage.ownerUserName = username
-                addphonepackage.callingSearchSpaceName = city+' International CSS'
+                addphonepackage.mobilityUserIdName = username
+                addphonepackage.callingSearchSpaceName = devCss
                 cawLogger.debug(addphonepackage)
 
                 createdPhone = self.service.addPhone(addphonepackage)
@@ -330,7 +323,7 @@ class cucmAxlWriter:
                 raise Exception(e)
 
     def deviceUpdate(self, username):
-        return True
+        return False
 
     def deviceDelete(self, username, devicetype):
         deviceName = self.deviceGetName(username, devicetype)
@@ -338,5 +331,152 @@ class cucmAxlWriter:
             result = self.service.removePhone(name=deviceName)
             cawLogger.info("Remove Phone Completed")
             cawLogger.info(result)
+            return True
         except Exception as e:
             cawLogger.info(e)
+            return False
+
+    def rdpGet(self, name):
+        try:
+            getRdp = self.service.getRemoteDestinationProfile(name=name)
+            cawLogger.info("getRdp Completed")
+            cawLogger.debug(getRdp)
+            return getRdp
+        except Exception as e:
+            return False
+
+    def rdpExists(self, name):
+        try:
+            getRdp = self.service.getRemoteDestinationProfile(name=name)
+            cawLogger.info("getRdp Completed")
+            cawLogger.debug(getRdp)
+            return True
+        except Exception as e:
+            return False
+
+    def rdpAdd(self, username, firstname, lastname, e164ext, did, extension,
+               building, city, partition='Internal PAR'):
+        deviceName = "RDP"+username
+        if not self.deviceExists(deviceName):
+            try:
+                nameString = firstname + " " + lastname
+
+                tempDirN1 = self.factory.XDirn()
+                tempDirN1.pattern = e164ext
+                tempDirN1.routePartitionName = partition
+                cawLogger.debug(tempDirN1)
+
+                # XPhoneLine is how a DirectoryNumber and a Phone are merged
+                tempPhoneLine1 = self.factory.XPhoneLine()
+                tempPhoneLine1.index = 1
+                tempPhoneLine1.dirn = tempDirN1
+
+                cawLogger.debug(tempPhoneLine1)
+
+                nameCss = city+' International CSS'
+                nameDevicePool = building+' DP'
+
+                rdpPackage = self.factory.XRemoteDestinationProfile()
+                rdpPackage.name = deviceName
+                rdpPackage.description = nameString + " x" + extension
+                rdpPackage.product = 'Remote Destination Profile'
+                rdpPackage.model = 'Remote Destination Profile'
+                rdpPackage['class'] = 'Remote Destination Profile'
+                rdpPackage.protocol = 'Remote Destination'
+                rdpPackage.protocolSide = 'User'
+                rdpPackage.callingSearchSpaceName = nameCss
+                rdpPackage.devicePoolName = nameDevicePool
+                rdpPackage.lines = {'line': tempPhoneLine1}
+                rdpPackage.callInfoPrivacyStatus = 'Default'
+                rdpPackage.userId = username
+                rdpPackage.rerouteCallingSearchSpaceName = nameCss
+                rdpPackage.primaryPhoneName = "CSF" + username
+
+                result = self.service.addRemoteDestinationProfile(rdpPackage)
+                return result
+            except Exception as e:
+                cawLogger.debug("Add Phone Error. Server error=%s", e)
+                # raise Exception("Phone could not be added")
+                # return "RDP Add Failed"
+                return e
+
+    def rdpUpdate(self, name):
+        return False
+
+    def rdpDelete(self, name):
+        devName = "RDP"+name
+        try:
+            result = self.service.removeRemoteDestinationProfile(name=devName)
+            cawLogger.info("Remove RDP Completed")
+            cawLogger.info(result)
+            return "Deleted"
+        except Exception as e:
+            cawLogger.info(e)
+            return "NOT Deleted"
+
+    def rDestGet(self, dest):
+        try:
+            getRDest = self.service.getRemoteDestination(destination=dest)
+            print(getRDest)
+            cawLogger.info("get Remote Dest Completed")
+            cawLogger.debug(getRDest)
+            return getRDest
+        except Exception as e:
+            return False
+
+    def rDestExists(self, dest):
+        try:
+            getRDest = self.service.getRemoteDestination(destination=dest)
+            print(getRDest)
+            cawLogger.info("get Remote Dest Completed")
+            cawLogger.debug(getRDest)
+            return True
+        except Exception as e:
+            return False
+
+    def rDestAdd(self, dest, userid, e164ext):
+        '''Bug in 11.5 and earlier API will prevent this from working.
+        In AXLSoap.xsd both dualModeDeviceName and
+        remoteDestinationProfileName have a minOccurs value of 1
+        yet these are mutually exclusive when configuring this device
+        found notes here
+        https://communities.cisco.com/thread/47106?start=0&tstart=0
+        notes indicated
+        "I had to edit the 10.5 AXLsoap.xsd file.  Under the
+        XRemoteDestination -> dualModeDeviceName
+        I set the minOccurs setting from 1 to 0.
+        Now AXL schema doesn't inject this setting into the response and
+        everything builds correctly.'''
+
+        cawLogger.info("Remote Dest Add Started")
+        devName = "RD"+userid
+        try:
+            rdPackage = self.factory.XRemoteDestination()
+            # not required or unique
+            rdPackage.name = devName
+            # required AND unique
+            rdPackage.destination = dest
+            rdPackage.answerTooSoonTimer = 1500
+            rdPackage.answerTooLateTimer = 19000
+            rdPackage.delayBeforeRingingCell = 4000
+            rdPackage.ownerUserId = userid
+            rdPackage.remoteDestinationProfileName = "RDP" + userid
+            rdPackage.isMobilePhone = 'true'
+            rdPackage.enableMobileConnect = 'true'
+            # rdPackage.dualModeDeviceName = "BOT" + userid
+            print(rdPackage)
+
+            result = self.service.addRemoteDestination(rdPackage)
+            print(result)
+            return result
+        except Exception as e:
+            cawLogger.debug("Add Remote Dest Error. Server error=%s", e)
+            # raise Exception("Phone could not be added")
+            # return "RDP Add Failed"
+            return e
+
+    def rDestUpdate(self):
+        return False
+
+    def rDestDelete(self):
+        return False
