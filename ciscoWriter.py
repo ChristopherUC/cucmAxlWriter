@@ -106,8 +106,6 @@ elif options.perform == 'delete':
     status.update({"ccm": myJabber.cleanJabber()})
     status.update({"cxn": myVoicemail.deleteVoicemail()})
     print(json.dumps(status))
-elif options.perform == 'rdp':
-    myJabber.rdpTest()
 else:
     print("Invalid / No Option selected")
 cwLogger.info("CiscoWriter Completed")
