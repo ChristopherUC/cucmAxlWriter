@@ -167,7 +167,7 @@ class cupiRestWriter:
         try:
             return data['User']['ObjectId']
         except KeyError:
-            return("KeyError: User note found VM will NOT be created")
+            return("KeyError: User NOT found VM cannot be created/deleted")
         if resp.status_code != 200:
             # This means something went wrong.
             raise Exception('GET {0} {1}'.format(url,
@@ -185,8 +185,9 @@ class cupiRestWriter:
                                headers=self.__headers)
         if resp.status_code != 204:
             # This means something went wrong.
-            raise Exception('Delete {0} {1}'.format(url,
-                                                    resp.status_code))
+            cupiRLogger.info('Delete {0} {1}'.format(url,
+                                                     resp.status_code))
             status.update({"mailboxDeleted": "Fail"})
-        status.update({"mailboxDeleted": "Success"})
+        else:
+            status.update({"mailboxDeleted": "Success"})
         return json.dumps(status)
