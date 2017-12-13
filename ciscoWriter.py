@@ -103,7 +103,6 @@ status = {}
 if options.perform == 'create':
     status.update({"ccm": myJabber.writeJabber()})
     # myVoicemail.createNewVoicemail()  # would use for non LDAP use case
-    print(options.vm)
     if options.vm.lower() in ['true', '1', 't', 'y', 'yes']:
         status.update({"cxn": myVoicemail.importNewVoicemail()})
     print(json.dumps(status))
