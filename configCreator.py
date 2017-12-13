@@ -117,11 +117,11 @@ class configCreator(appConfig):
                     verify = True
                 else:
                     verify = False
-                    self.__setAppCert(False)
+                    self._setAppCert(False)
             else:
                 confLogger.debug("Bypassing certificate download")
                 verify = False
-                self.__setAppCert(False)
+                self._setAppCert(False)
 
         data = {'username': username, 'password': password, 'url': url,
                 'verify': verify, 'verifyFile': self.getAppCert()}
