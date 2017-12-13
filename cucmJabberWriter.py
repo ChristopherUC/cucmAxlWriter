@@ -178,7 +178,14 @@ class cucmJabberWriter:
                                          lastname=self.getLastName(),
                                          building=self.getBuilding(),
                                          city=self.getCity(),
-                                         vm=self.getVM())
+                                         vm='True',
+                                         # vm=self.getVM()) # original code
+                                         vmProfileName=self.getVMprofile())
+            # vm= is NOW set to always 'True' because of the use case where
+            # users with NO voicemail have a voicmail profile set that
+            # still fowrwards callers to voicemail to be answered by a
+            # call handler. 
+
             cjwLogger.info("createJabberLine Completed")
             return "Success"  # Line Created
         else:
