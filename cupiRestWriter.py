@@ -36,15 +36,17 @@ class cupiRestWriter:
     __baseUrl = ''
     __auth = ''
     __verify = ''
-    __template = 'voicemailusertemplate'
+    _template = 'voicemailusertemplate'
     _newUserData = ''
     _alias = ''
     _extension = ''
 
-    def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress):
+    def __init__(self, Alias, Extension, FirstName, LastName, EmailAddress,
+                 Template):
         cupiRLogger.info("Rest Writer Started")
         self._alias = Alias
         self._extension = Extension
+        self._template = Template
         self.myCxnConfig = cxnAppConfig('cxn.cfg')
 
         if '!' in FirstName or '!' in LastName:
@@ -82,7 +84,7 @@ class cupiRestWriter:
         cupiRLogger.info("Create Voicemail Started")
         vmCreateUrl = 'users'
         url = self.__baseUrl + vmCreateUrl
-        querystring = {"templateAlias": self.__template}
+        querystring = {"templateAlias": self._template}
 
         resp = requests.post(url,
                              auth=self.__auth,
@@ -126,7 +128,7 @@ class cupiRestWriter:
         userData = json.dumps({"dtmfAccessId": self._extension, "pkid": pkid})
         vmCreateUrl = 'import/users/ldap'
         url = self.__baseUrl + vmCreateUrl
-        query = {"templateAlias": self.__template}
+        query = {"templateAlias": self._template}
 
         resp = requests.post(url,
                              auth=self.__auth,
