@@ -148,7 +148,8 @@ class cucmAxlWriter:
             return False
 
     def lineAdd(self, extension, firstname, lastname, building, city,
-                vm='False', partition='Internal PAR', usage='Device'):
+                vm='True', vmProfileName="<None>", partition='Internal PAR',
+                usage='Device'):
         if not self.lineExists(extension):
             try:
                 # devCss = city+' International CSS'
@@ -183,6 +184,8 @@ class cucmAxlWriter:
                 addlinepackage.alertingName = nameString
                 addlinepackage.asciiAlertingName = nameString
                 addlinepackage.description = nameString
+
+                addlinepackage.voiceMailProfileName = vmProfileName
 
                 cawLogger.info("Line Factory Completed")
                 cawLogger.debug(addlinepackage)
