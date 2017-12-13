@@ -52,7 +52,7 @@ class cucmAxlWriter:
         tempzeep = os.path.join(tempfile.gettempdir(), 'wsdlsqlite.db')
         cache = SqliteCache(path=tempzeep, timeout=60)
         transport = Transport(cache=cache)
-        client = Client(myCucmConfig.getwsdlFileName(), transport=transport)
+        #client = Client(myCucmConfig.getwsdlFileName(), transport=transport)
 
         session = Session()
         if myCucmConfig.getAppVerify():
