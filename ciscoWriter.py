@@ -50,6 +50,8 @@ parser.add_option("-b", "--emailaddress", action="store", type="string",
                   dest="emailaddress", help="jabber user Email Address")
 parser.add_option("-p", "--vmprofile", action="store", type="string",
                   dest="vmprofile", help="UCM user Voicemail profile")
+# if a specific profile is to be provided, it must be provided
+# if system default profile of "<None>" is desired, omit the -p switch
 parser.add_option("-t", "--vmtemplate", action="store", type="string",
                   dest="vmtemplate", help="CXN user Voicemail template")
 parser.add_option("-c", "--classofservice", action="store", type="string",
