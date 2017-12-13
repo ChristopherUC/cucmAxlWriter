@@ -49,7 +49,9 @@ parser.add_option("-v", "--voicemail", action="store", type="string",
 parser.add_option("-b", "--emailaddress", action="store", type="string",
                   dest="emailaddress", help="jabber user Email Address")
 parser.add_option("-p", "--vmprofile", action="store", type="string",
-                  dest="vmprofile", help="jabber user Voicemail T/F")
+                  dest="vmprofile", help="UCM user Voicemail profile")
+parser.add_option("-t", "--vmtemplate", action="store", type="string",
+                  dest="vmtemplate", help="CXN user Voicemail template")
 parser.add_option("-c", "--classofservice", action="store", type="string",
                   dest="cos", help="Class of Service for jabber user")
 parser.add_option("-r", "--singlenumberreach", action="store", type="string",
@@ -59,8 +61,8 @@ parser.add_option("-m", "--snrdid", action="store", type="string",
 (options, args) = parser.parse_args()
 
 '''./ciscoWriter.py -a create -u tdurden -e 223611 -d 2065551234 -s Tampa
- -i Northwoods -g 54321 -v True -b tdurden@apitest.org -p voicemailusertemplate
-  -c International -r False -m 4255551212'''
+ -i Northwoods -g 54321 -v True -p NIKE-No-Voicemail -b tdurden@apitest.org
+ -t voicemailusertemplate -c International -r False -m 4255551212'''
 
 if not options.firstname:
     options.firstname = 'GetAD!'
@@ -92,7 +94,8 @@ myVoicemail = cupiRestWriter(Alias=options.username,
                              Extension="+1" + options.did,
                              FirstName=options.firstname,
                              LastName=options.lastname,
-                             EmailAddress=options.emailaddress)
+                             EmailAddress=options.emailaddress,
+                             Template=options.vmtemplate)
 
 status = {}
 if options.perform == 'create':
