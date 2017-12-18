@@ -63,7 +63,7 @@ parser.add_option("-m", "--snrdid", action="store", type="string",
 (options, args) = parser.parse_args()
 
 '''./ciscoWriter.py -a create -u tdurden -e 223611 -d 2065551234 -s Tampa
- -i Northwoods -g 54321 -v True -p NIKE-No-Voicemail -b tdurden@apitest.org
+ -i Northwoods -g 54321 -v True -p CUST-No-Voicemail -b tdurden@apitest.org
  -t voicemailusertemplate -c International -r False -m 4255551212'''
 
 if not options.firstname:
