@@ -10,7 +10,7 @@ idna==2.5
 isodate==0.5.4
 lxml==3.8.0
 pycparser==2.18
-pyOpenSSL==17.5.0
+pyOpenSSL==19.0.0
 pytz==2017.2
 requests==2.20.0
 requests-toolbelt==0.8.0
